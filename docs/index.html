@@ -386,7 +386,7 @@ header h1{font-size:1.1rem;font-weight:700;letter-spacing:-.3px}
 <script>
 const OWNER  = 'willy0929716513-debug';
 const REPO   = '-';
-const BRANCH = 'claude/tennis-prediction-model-OhNiO';
+const BRANCH = 'main';
 const WF     = 'tennis_bot.yml';
 const SURF   = {clay:'🟤 紅土', grass:'🟢 草地', hard:'🔵 硬地'};
 
@@ -671,6 +671,15 @@ function renderPick(p){
   </div>`;
 }
 
+function showMoreHist(){
+  const extra=document.getElementById('hist-extra');
+  const btn=document.getElementById('hist-more-btn');
+  const body=q('hist');
+  Array.from(extra.children).forEach(c=>body.insertBefore(c,btn));
+  extra.remove();
+  btn.remove();
+}
+
 async function load(){
   let data;
   try{
@@ -714,7 +723,7 @@ async function load(){
 
   const hist = data.recent_history || [];
   if(hist.length){
-    q('hist').innerHTML = hist.map(b=>{
+    const mkHCard = b => {
       const r=b.result||'P';
       const ico=r==='W'?'✅':r==='L'?'❌':'🔄';
       const cls=r==='W'?'g':r==='L'?'r':'';
@@ -729,7 +738,13 @@ async function load(){
         </div>
         <div style="font-size:.75rem;font-weight:700;margin-left:auto;flex-shrink:0" class="${cls}">${r==='P'?'待結算':r==='W'?'勝':'敗'}</div>
       </div>`;
-    }).join('');
+    };
+    let hhtml = hist.slice(0,3).map(mkHCard).join('');
+    if(hist.length > 3){
+      const extra = hist.slice(3);
+      hhtml += `<div id="hist-extra" style="display:none">${extra.map(mkHCard).join('')}</div><button class="btn btn-ghost btn-sm" id="hist-more-btn" style="flex-shrink:0;align-self:center;white-space:nowrap" onclick="showMoreHist()">＋ 更多 ${extra.length} 場</button>`;
+    }
+    q('hist').innerHTML = hhtml;
   } else {
     q('hist').innerHTML = '<span style="color:var(--muted);font-size:.8rem;padding:4px 8px">尚無歷史紀錄</span>';
   }
