@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-05-31 15:13 (台灣時間)",
-  "generated_at_iso": "2026-05-31T15:13:56+08:00",
-  "date": "2026-05-31",
+  "generated_at": "2026-06-01 17:10 (台灣時間)",
+  "generated_at_iso": "2026-06-01T17:10:45+08:00",
+  "date": "2026-06-01",
   "model_version": "v3.2 — 15-factor: ELO(live)+BO5+SurfaceH2H+1stSrv+BPconv+Cond+KellyTier",
   "stats": {
     "settled": 6,
@@ -103,72 +103,6 @@
   ],
   "live_matches": [],
   "game_preds": {
-    "rafael jodar|pablo carreno busta": {
-      "p1": "Rafael Jodar",
-      "p2": "Pablo Carreno Busta",
-      "p1_key": "rafael_jodar",
-      "p2_key": "carreno_busta",
-      "model_p1": 0.5947,
-      "surface": "clay",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 37.3
-    },
-    "jakub mensik|andrey rublev": {
-      "p1": "Jakub Mensik",
-      "p2": "Andrey Rublev",
-      "p1_key": "jakub_mensik",
-      "p2_key": "rublev",
-      "model_p1": 0.4122,
-      "surface": "clay",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 41.7
-    },
-    "jesper de jong|alexander zverev": {
-      "p1": "Jesper De Jong",
-      "p2": "Alexander Zverev",
-      "p1_key": "jesper_de_jong",
-      "p2_key": "zverev",
-      "model_p1": 0.1267,
-      "surface": "clay",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 36.5
-    },
-    "casper ruud|joao fonseca": {
-      "p1": "Casper Ruud",
-      "p2": "Joao Fonseca",
-      "p1_key": "ruud",
-      "p2_key": "joao_fonseca",
-      "model_p1": 0.6933,
-      "surface": "clay",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 40.9
-    },
-    "felix auger-aliassime|alejandro tabilo": {
-      "p1": "Felix Auger-Aliassime",
-      "p2": "Alejandro Tabilo",
-      "p1_key": "auger_aliassime",
-      "p2_key": "alejandro_tabilo",
-      "model_p1": 0.4886,
-      "surface": "clay",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 41.3
-    },
-    "frances tiafoe|matteo arnaldi": {
-      "p1": "Frances Tiafoe",
-      "p2": "Matteo Arnaldi",
-      "p1_key": "tiafoe",
-      "p2_key": "matteo_arnaldi",
-      "model_p1": 0.7201,
-      "surface": "clay",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 40.2
-    },
     "flavio cobolli|zachary svajda": {
       "p1": "Flavio Cobolli",
       "p2": "Zachary Svajda",
@@ -178,7 +112,7 @@
       "surface": "clay",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 37.5
+      "exp_games": 37.7
     },
     "juan manuel cerundolo|matteo berrettini": {
       "p1": "Juan Manuel Cerundolo",
@@ -189,51 +123,51 @@
       "surface": "clay",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 41.3
+      "exp_games": 41.4
     },
-    "marta kostyuk|iga swiatek": {
-      "p1": "Marta Kostyuk",
-      "p2": "Iga Swiatek",
-      "p1_key": "kostyuk",
-      "p2_key": "swiatek",
-      "model_p1": 0.5535,
+    "felix auger-aliassime|alejandro tabilo": {
+      "p1": "Felix Auger-Aliassime",
+      "p2": "Alejandro Tabilo",
+      "p1_key": "auger_aliassime",
+      "p2_key": "alejandro_tabilo",
+      "model_p1": 0.4886,
       "surface": "clay",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 39.8
+      "exp_games": 41.0
     },
-    "sorana cirstea|xiyu wang": {
-      "p1": "Sorana Cirstea",
-      "p2": "Xiyu Wang",
-      "p1_key": "sorana_cirstea",
-      "p2_key": "xiyu_wang",
-      "model_p1": 0.6623,
+    "frances tiafoe|matteo arnaldi": {
+      "p1": "Frances Tiafoe",
+      "p2": "Matteo Arnaldi",
+      "p1_key": "tiafoe",
+      "p2_key": "matteo_arnaldi",
+      "model_p1": 0.7201,
       "surface": "clay",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 37.9
+      "exp_games": 40.3
     },
-    "elina svitolina|belinda bencic": {
-      "p1": "Elina Svitolina",
-      "p2": "Belinda Bencic",
-      "p1_key": "elina_svitolina",
-      "p2_key": "bencic",
-      "model_p1": 0.5847,
+    "rafael jodar|alexander zverev": {
+      "p1": "Rafael Jodar",
+      "p2": "Alexander Zverev",
+      "p1_key": "rafael_jodar",
+      "p2_key": "zverev",
+      "model_p1": 0.4357,
       "surface": "clay",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 40.0
+      "exp_games": 40.6
     },
-    "mirra andreeva|jil teichmann": {
-      "p1": "Mirra Andreeva",
-      "p2": "Jil Teichmann",
-      "p1_key": "mirra_andreeva",
-      "p2_key": "jil_teichmann",
-      "model_p1": 0.602,
+    "jakub mensik|joao fonseca": {
+      "p1": "Jakub Mensik",
+      "p2": "Joao Fonseca",
+      "p1_key": "jakub_mensik",
+      "p2_key": "joao_fonseca",
+      "model_p1": 0.503,
       "surface": "clay",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 39.3
+      "exp_games": 41.8
     },
     "anastasia potapova|anna kalinskaya": {
       "p1": "Anastasia Potapova",
@@ -244,18 +178,7 @@
       "surface": "clay",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 38.1
-    },
-    "aryna sabalenka|naomi osaka": {
-      "p1": "Aryna Sabalenka",
-      "p2": "Naomi Osaka",
-      "p1_key": "sabalenka",
-      "p2_key": "naomi_osaka",
-      "model_p1": 0.5612,
-      "surface": "clay",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 39.9
+      "exp_games": 38.0
     },
     "madison keys|diana shnaider": {
       "p1": "Madison Keys",
@@ -266,7 +189,7 @@
       "surface": "clay",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 39.9
+      "exp_games": 39.8
     },
     "maja chwalinska|diane parry": {
       "p1": "Maja Chwalinska",
@@ -277,7 +200,40 @@
       "surface": "clay",
       "tour_level": "grand_slam",
       "best_of": 5,
+      "exp_games": 40.2
+    },
+    "aryna sabalenka|naomi osaka": {
+      "p1": "Aryna Sabalenka",
+      "p2": "Naomi Osaka",
+      "p1_key": "sabalenka",
+      "p2_key": "naomi_osaka",
+      "model_p1": 0.5612,
+      "surface": "clay",
+      "tour_level": "grand_slam",
+      "best_of": 5,
       "exp_games": 40.1
+    },
+    "elina svitolina|marta kostyuk": {
+      "p1": "Elina Svitolina",
+      "p2": "Marta Kostyuk",
+      "p1_key": "elina_svitolina",
+      "p2_key": "kostyuk",
+      "model_p1": 0.3943,
+      "surface": "clay",
+      "tour_level": "grand_slam",
+      "best_of": 5,
+      "exp_games": 40.2
+    },
+    "mirra andreeva|sorana cirstea": {
+      "p1": "Mirra Andreeva",
+      "p2": "Sorana Cirstea",
+      "p1_key": "mirra_andreeva",
+      "p2_key": "sorana_cirstea",
+      "model_p1": 0.5225,
+      "surface": "clay",
+      "tour_level": "grand_slam",
+      "best_of": 5,
+      "exp_games": 40.8
     }
   }
 }
