@@ -284,7 +284,7 @@ header h1{font-size:1.1rem;font-weight:700;letter-spacing:-.3px}
   </div>
 </header>
 <div class="action-bar">
-  <button class="btn btn-primary btn-sm" id="btn-run" onclick="run('full')">⚡ 執行預測</button>
+  <button class="btn btn-primary btn-sm" id="btn-run" onclick="run()">⚡ 執行預測</button>
 </div>
 
 <!-- SETTINGS MODAL -->
@@ -420,7 +420,7 @@ function refreshData(){
   load().finally(()=>{ picks.style.opacity='1'; toast('已更新 ✅','ok'); });
 }
 
-async function run(mode='full'){
+async function run(){
   const tk=sanitizeTk(getTk());
   if(!tk){ openSettings(); toast('請先設定 Token','err'); return; }
   const btn = document.getElementById('btn-run');
@@ -431,7 +431,7 @@ async function run(mode='full'){
       { method:'POST',
         headers:{'Authorization':'Bearer '+tk,'Accept':'application/vnd.github+json',
                  'X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},
-        body: JSON.stringify({ref:BRANCH, inputs:{mode}}) }
+        body: JSON.stringify({ref:BRANCH}) }
     );
     if(res.status===204){
       toast('已觸發！約 1–2 分鐘後完成 ✅','ok');
@@ -565,13 +565,11 @@ function renderPick(p){
   const cc    = confColor(conf);
   const edgeStr = p.edge!=null ? '+'+p.edge+'%' : '—';
   const tierLbl = {A:'A 精選', B:'B 推薦', C:'C 關注'}[tier] || tier;
-  // Player names
   const p1zh=p.p1_cn||p.p1||'—', p2zh=p.p2_cn||p.p2||'—';
   const p1en=(p.p1_cn&&p.p1_cn!==p.p1)?p.p1:'';
   const p2en=(p.p2_cn&&p.p2_cn!==p.p2)?p.p2:'';
   const p1last=p.p1_cn||(p.p1?p.p1.split(' ').pop():p.p1);
   const p2last=p.p2_cn||(p.p2?p.p2.split(' ').pop():p.p2);
-  // Probability bar
   const betIsP1=p.bet_on&&p.p1&&(p.bet_on===p.p1||(p.p1_cn&&p.bet_on===p.p1_cn));
   const p1pct=p.model_p!=null?(betIsP1?p.model_p:+(100-p.model_p).toFixed(1)):null;
   const p2pct=p1pct!=null?+(100-p1pct).toFixed(1):null;
@@ -579,9 +577,7 @@ function renderPick(p){
     <div class="prob-nums"><span class="pn1">${p1pct}%</span><span class="prob-vs">模型勝率</span><span class="pn2">${p2pct}%</span></div>
     <div class="prob-bar-track"><div class="prob-fill-p1" style="width:${p1pct}%"></div><div class="prob-fill-p2" style="width:${p2pct}%"></div></div>
   </div>`:'<div class="prob-mid"></div>';
-  // Streak
   const sb1=streakBadge(p.win_streak1||0), sb2=streakBadge(p.win_streak2||0);
-  // Player row
   const playerRow=`<div class="player-row">
     <div class="player-side p1">
       <div class="player-avatar">${initials(p.p1||'')}</div>
@@ -595,14 +591,12 @@ function renderPick(p){
       ${p2en?`<div class="player-name-en">${p2en}</div>`:''} ${sb2}
     </div>
   </div>`;
-  // Metrics
   const marketP=p.dv_p!=null?p.dv_p+'%':'—';
   const metricsRow=`<div class="pick-metrics">
     <div class="metric"><div class="m-lbl">市場隱含</div><div class="m-val">${marketP}</div></div>
     <div class="metric"><div class="m-lbl">優勢 Edge</div><div class="m-val g">${edgeStr}</div></div>
     <div class="metric"><div class="m-lbl">信心指數</div><div class="m-val ${cc}">${conf}<span style="font-size:.6rem;color:var(--muted);font-weight:400">/100</span></div></div>
   </div>`;
-  // Attack stats
   const fs1=p.fs_pct1,fs2=p.fs_pct2,bp1=p.bp_conv1,bp2=p.bp_conv2,ld1=p.load1,ld2=p.load2;
   const [fc1,fc2]=cmp(fs1,fs2,true),[bc1,bc2]=cmp(bp1,bp2,true);
   const statsRows=[
@@ -611,7 +605,6 @@ function renderPick(p){
     (ld1!=null||ld2!=null)?`<div class="ps-row"><span class="ps-lbl">近期負荷</span><span class="ps-val">${fmtLoad(ld1)}</span><span class="ps-val">${fmtLoad(ld2)}</span></div>`:'',
   ].filter(Boolean).join('');
   const statsBlock=statsRows?`<div class="pstats"><div class="ps-head"><span>進攻對比</span><span title="${p.p1||''}">${p1last}</span><span title="${p.p2||''}">${p2last}</span></div>${statsRows}</div>`:'';
-  // Defensive stats
   const bs1=p.bp_save1,bs2=p.bp_save2,df1=p.df_rate1,df2=p.df_rate2;
   const [bsc1,bsc2]=cmp(bs1,bs2,true),[dfc1,dfc2]=cmp(df1,df2,false);
   const defRows=[
@@ -619,7 +612,6 @@ function renderPick(p){
     (df1!=null||df2!=null)?`<div class="ps-row"><span class="ps-lbl">雙誤率</span><span class="ps-val ${dfc1}">${df1!=null?df1+'%':'—'}</span><span class="ps-val ${dfc2}">${df2!=null?df2+'%':'—'}</span></div>`:'',
   ].filter(Boolean).join('');
   const defBlock=defRows?`<details class="def-stats"><summary>🛡 防守數據</summary><div class="def-stats-body"><div class="ps-head"><span>防守對比</span><span title="${p.p1||''}">${p1last}</span><span title="${p.p2||''}">${p2last}</span></div>${defRows}</div></details>`:'';
-  // V4 pills
   const v4map=[{lbl:'風格剋制',val:p.style_adj},{lbl:'場地轉換',val:p.surf_trans_adj},{lbl:'回球深度',val:p.ret_depth_adj},{lbl:'傷病風險',val:p.inj_adj},{lbl:'市場偏差',val:p.public_bias_adj}].filter(e=>e.val!=null&&Math.abs(e.val)>=0.5);
   const v4block=v4map.length?`<div class="v4-adjs">${v4map.map(e=>`<span class="v4-pill ${e.val>0?'pos':'neg'}">${e.lbl} ${e.val>0?'+':''}${e.val.toFixed(1)}%</span>`).join('')}</div>`:'';
   const v4explain=[
@@ -630,9 +622,7 @@ function renderPick(p){
     {lbl:'市場偏差',val:p.public_bias_adj,posDesc:`市場高估 ${p2last}，${p1last} 具潛在價值`,negDesc:`市場高估 ${p1last}，${p2last} 具潛在價值`},
   ].filter(e=>e.val!=null&&Math.abs(e.val)>=0.5);
   const v4expBlock=v4explain.length?`<details class="v4-explain"><summary>📊 調整說明（${v4explain.length} 項因子）</summary><div class="v4-explain-body">${v4explain.map(e=>{const cls=e.val>0?'pos':'neg';const desc=e.val>0?e.posDesc:e.negDesc;return`<div class="v4-exp-row"><span class="v4-exp-pill ${cls}">${e.lbl} ${e.val>0?'+':''}${e.val.toFixed(1)}%</span><span class="v4-exp-desc">${desc}</span></div>`;}).join('')}</div></details>`:'';
-  // CLV row
   const clvRow=p.opening_dv_p!=null?`<div class="clv-row"><span>開盤隱含 <strong>${p.opening_dv_p}%</strong></span><span>模型 <strong>${p.model_p!=null?p.model_p+'%':'—'}</strong></span><span style="font-size:.62rem">CLV = 實際閉盤對比</span></div>`:'';
-  // Bet slip
   const betNameZh=p.bet_on_cn||p.bet_on||'—';
   const betNameEn=(p.bet_on_cn&&p.bet_on_cn!==p.bet_on)?p.bet_on:'';
   return `<div class="pick tier-${tier}">
