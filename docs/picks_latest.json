@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-06-05 16:30 (台灣時間)",
-  "generated_at_iso": "2026-06-05T16:30:14+08:00",
+  "generated_at": "2026-06-05 20:53 (台灣時間)",
+  "generated_at_iso": "2026-06-05T20:53:50+08:00",
   "date": "2026-06-05",
   "model_version": "v3.2 — 15-factor: ELO(live)+BO5+SurfaceH2H+1stSrv+BPconv+Cond+KellyTier",
   "stats": {
@@ -112,7 +112,7 @@
       "surface": "clay",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 41.5
+      "exp_games": 41.7
     },
     "matteo arnaldi|flavio cobolli": {
       "p1": "Matteo Arnaldi",
@@ -123,7 +123,7 @@
       "surface": "clay",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 40.7
+      "exp_games": 40.5
     },
     "maja chwalinska|mirra andreeva": {
       "p1": "Maja Chwalinska",
