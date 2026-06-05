@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-03 16:30 (台灣時間)",
-  "generated_at_iso": "2026-06-03T16:30:04+08:00",
-  "date": "2026-06-03",
+  "generated_at": "2026-06-05 16:30 (台灣時間)",
+  "generated_at_iso": "2026-06-05T16:30:14+08:00",
+  "date": "2026-06-05",
   "model_version": "v3.2 — 15-factor: ELO(live)+BO5+SurfaceH2H+1stSrv+BPconv+Cond+KellyTier",
   "stats": {
     "settled": 6,
@@ -103,28 +103,6 @@
   ],
   "live_matches": [],
   "game_preds": {
-    "felix auger-aliassime|flavio cobolli": {
-      "p1": "Felix Auger-Aliassime",
-      "p2": "Flavio Cobolli",
-      "p1_key": "auger_aliassime",
-      "p2_key": "cobolli",
-      "model_p1": 0.4907,
-      "surface": "clay",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 41.6
-    },
-    "matteo berrettini|matteo arnaldi": {
-      "p1": "Matteo Berrettini",
-      "p2": "Matteo Arnaldi",
-      "p1_key": "berrettini",
-      "p2_key": "arnaldi",
-      "model_p1": 0.5892,
-      "surface": "clay",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 40.7
-    },
     "jakub mensik|alexander zverev": {
       "p1": "Jakub Mensik",
       "p2": "Alexander Zverev",
@@ -136,38 +114,27 @@
       "best_of": 5,
       "exp_games": 41.5
     },
-    "anna kalinskaya|maja chwalinska": {
-      "p1": "Anna Kalinskaya",
-      "p2": "Maja Chwalinska",
-      "p1_key": "kalinskaya",
-      "p2_key": "chwalinska",
-      "model_p1": 0.4996,
+    "matteo arnaldi|flavio cobolli": {
+      "p1": "Matteo Arnaldi",
+      "p2": "Flavio Cobolli",
+      "p1_key": "arnaldi",
+      "p2_key": "cobolli",
+      "model_p1": 0.315,
       "surface": "clay",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 40.1
+      "exp_games": 40.7
     },
-    "aryna sabalenka|diana shnaider": {
-      "p1": "Aryna Sabalenka",
-      "p2": "Diana Shnaider",
-      "p1_key": "sabalenka",
-      "p2_key": "shnaider",
-      "model_p1": 0.6121,
-      "surface": "clay",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 39.9
-    },
-    "marta kostyuk|mirra andreeva": {
-      "p1": "Marta Kostyuk",
+    "maja chwalinska|mirra andreeva": {
+      "p1": "Maja Chwalinska",
       "p2": "Mirra Andreeva",
-      "p1_key": "kostyuk",
+      "p1_key": "chwalinska",
       "p2_key": "andreeva",
-      "model_p1": 0.5993,
+      "model_p1": 0.4051,
       "surface": "clay",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 39.5
+      "exp_games": 38.4
     }
   }
 }
