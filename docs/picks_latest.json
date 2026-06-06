@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-05 20:53 (台灣時間)",
-  "generated_at_iso": "2026-06-05T20:53:50+08:00",
-  "date": "2026-06-05",
+  "generated_at": "2026-06-06 17:54 (台灣時間)",
+  "generated_at_iso": "2026-06-06T17:54:55+08:00",
+  "date": "2026-06-06",
   "model_version": "v3.2 — 15-factor: ELO(live)+BO5+SurfaceH2H+1stSrv+BPconv+Cond+KellyTier",
   "stats": {
     "settled": 6,
@@ -103,27 +103,16 @@
   ],
   "live_matches": [],
   "game_preds": {
-    "jakub mensik|alexander zverev": {
-      "p1": "Jakub Mensik",
+    "flavio cobolli|alexander zverev": {
+      "p1": "Flavio Cobolli",
       "p2": "Alexander Zverev",
-      "p1_key": "mensik",
+      "p1_key": "cobolli",
       "p2_key": "zverev",
-      "model_p1": 0.3825,
+      "model_p1": 0.4269,
       "surface": "clay",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 41.7
-    },
-    "matteo arnaldi|flavio cobolli": {
-      "p1": "Matteo Arnaldi",
-      "p2": "Flavio Cobolli",
-      "p1_key": "arnaldi",
-      "p2_key": "cobolli",
-      "model_p1": 0.315,
-      "surface": "clay",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 40.5
+      "exp_games": 41.6
     },
     "maja chwalinska|mirra andreeva": {
       "p1": "Maja Chwalinska",
