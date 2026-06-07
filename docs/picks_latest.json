@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-06 17:54 (台灣時間)",
-  "generated_at_iso": "2026-06-06T17:54:55+08:00",
-  "date": "2026-06-06",
+  "generated_at": "2026-06-07 20:57 (台灣時間)",
+  "generated_at_iso": "2026-06-07T20:57:58+08:00",
+  "date": "2026-06-07",
   "model_version": "v3.2 — 15-factor: ELO(live)+BO5+SurfaceH2H+1stSrv+BPconv+Cond+KellyTier",
   "stats": {
     "settled": 6,
@@ -108,22 +108,11 @@
       "p2": "Alexander Zverev",
       "p1_key": "cobolli",
       "p2_key": "zverev",
-      "model_p1": 0.4269,
+      "model_p1": 0.427,
       "surface": "clay",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 41.6
-    },
-    "maja chwalinska|mirra andreeva": {
-      "p1": "Maja Chwalinska",
-      "p2": "Mirra Andreeva",
-      "p1_key": "chwalinska",
-      "p2_key": "andreeva",
-      "model_p1": 0.4051,
-      "surface": "clay",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 38.4
+      "exp_games": 41.4
     }
   }
 }
