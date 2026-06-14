@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-11 18:25 (台灣時間)",
-  "generated_at_iso": "2026-06-11T18:25:10+08:00",
-  "date": "2026-06-11",
+  "generated_at": "2026-06-14 17:29 (台灣時間)",
+  "generated_at_iso": "2026-06-14T17:29:37+08:00",
+  "date": "2026-06-14",
   "model_version": "v3.2 — 15-factor: ELO(live)+BO5+SurfaceH2H+1stSrv+BPconv+Cond+KellyTier",
   "stats": {
     "settled": 6,
