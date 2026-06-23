@@ -32,6 +32,27 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Clone Sackmann tennis data
+        continue-on-error: true
+        run: |
+          YEAR=$(date +%Y)
+          PREV=$((YEAR-1))
+          PREV2=$((YEAR-2))
+          for TOUR in atp wta; do
+            git clone --depth=1 --filter=blob:none --sparse \
+              https://github.com/JeffSackmann/tennis_${TOUR}.git /tmp/sackmann_${TOUR} 2>/dev/null && \
+            cd /tmp/sackmann_${TOUR} && \
+            git sparse-checkout set \
+              ${TOUR}_players.csv \
+              ${TOUR}_rankings_current.csv \
+              ${TOUR}_matches_${YEAR}.csv \
+              ${TOUR}_matches_${PREV}.csv \
+              ${TOUR}_matches_${PREV2}.csv && \
+            git checkout 2>/dev/null && \
+            echo "${TOUR} clone OK" || echo "${TOUR} clone failed"
+            cd - 2>/dev/null || true
+          done
+
       - name: Run Tennis Bot
         env:
           ODDS_API_KEY:    ${{ secrets.ODDS_API_KEY }}
@@ -40,6 +61,8 @@ jobs:
           GIST_ID:         ${{ secrets.GIST_ID }}
           NTFY_TOPIC:      ${{ secrets.NTFY_TOPIC }}
           GITHUB_TOKEN:    ${{ secrets.GITHUB_TOKEN }}
+          SACKMANN_ATP_PATH: /tmp/sackmann_atp
+          SACKMANN_WTA_PATH: /tmp/sackmann_wta
         run: python tennis_bot.py
 
       - name: Commit updated picks

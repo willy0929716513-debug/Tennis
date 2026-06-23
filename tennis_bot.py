@@ -457,6 +457,8 @@ ATP_STATS: Dict[str, dict] = {
         "clay":{"svpt_won":0.618,"rtpt_won":0.342,"elo":1910},
         "grass":{"svpt_won":0.612,"rtpt_won":0.325,"elo":1860}},
     # ── Ranks 85-300 (qualifying / lower-ranked tour players) ─────────────────
+    "michael_zheng": {"full_name":"Michael Zheng","hand":"R","rank":100,"country":"USA","birth_year":2005,"backhand":"2h",
+        "hard":{"svpt_won":0.601,"rtpt_won":0.320,"elo":1725},"clay":{"svpt_won":0.598,"rtpt_won":0.318,"elo":1705},"grass":{"svpt_won":0.600,"rtpt_won":0.318,"elo":1705}},
     "christopher_o'connell": {"full_name":"Christopher O'Connell","hand":"R","rank":85,"country":"AUS","birth_year":1994,"backhand":"2h",
         "hard":{"svpt_won":0.610,"rtpt_won":0.328,"elo":1762},"clay":{"svpt_won":0.608,"rtpt_won":0.326,"elo":1742},"grass":{"svpt_won":0.612,"rtpt_won":0.328,"elo":1742}},
     "marcelo_tomas_barrios_vera": {"full_name":"Marcelo Tomas Barrios Vera","hand":"R","rank":90,"country":"CHI","birth_year":2003,"backhand":"2h",
@@ -2130,6 +2132,8 @@ _ALIASES: Dict[str, str] = {
     "sorribes tormo":             "sara_sorribes_tormo",
     "haddad maia":                "haddad_maia",
     # ── New ATP qualifying / lower-ranked players (ranks 85-300) ────────────────
+    "michael zheng":              "michael_zheng",
+    "m. zheng":                   "michael_zheng",
     "christopher o'connell":      "christopher_o'connell",
     "c. o'connell":               "christopher_o'connell",
     "marcelo tomas barrios vera": "marcelo_tomas_barrios_vera",
@@ -2369,14 +2373,31 @@ def cn_name(full_name: str) -> str:
     return full_name.split()[-1] if full_name.split() else full_name
 
 
-def norm_player(name: str) -> str:
+def norm_player(name: str, tour: str = "") -> str:
+    """Normalise a player display name to a database key.
+
+    tour: "atp" or "wta" hint to avoid cross-tour last-name collisions
+    (e.g. "Zheng" in ATP context must not resolve to WTA Qinwen Zheng).
+    """
     n = name.lower().strip()
     if n in _ALIASES:
-        return _ALIASES[n]
-    last = n.split()[-1] if n.split() else n
-    for alias, key in _ALIASES.items():
-        if alias.split()[-1] == last:
+        key = _ALIASES[n]
+        # Skip if the key belongs only to the opposite tour
+        if tour == "atp" and key in WTA_STATS and key not in ATP_STATS:
+            pass
+        elif tour == "wta" and key in ATP_STATS and key not in WTA_STATS:
+            pass
+        else:
             return key
+    # Last-name shortcut: only for single-word inputs (avoids "Michael Zheng" → WTA Zheng)
+    if " " not in n and "-" not in n:
+        for alias, key in _ALIASES.items():
+            if alias.split()[-1] == n:
+                if tour == "atp" and key in WTA_STATS and key not in ATP_STATS:
+                    continue
+                if tour == "wta" and key in ATP_STATS and key not in WTA_STATS:
+                    continue
+                return key
     return n.replace(" ", "_").replace("-", "_")
 
 
@@ -2536,42 +2557,54 @@ def _rank_based_stats(rank: int, surface: str, tour: str) -> dict:
 
 
 def fetch_current_rankings() -> None:
-    """Fetch current ATP/WTA rankings from Jeff Sackmann's GitHub repos."""
+    """Load current ATP/WTA rankings from local cloned Sackmann repo or HTTP fallback."""
     gh_token = os.environ.get("GITHUB_TOKEN", "")
-    headers: dict = {"Authorization": f"token {gh_token}"} if gh_token else {}
+    http_headers: dict = {"Authorization": f"token {gh_token}"} if gh_token else {}
+    local_paths = {
+        "atp": os.environ.get("SACKMANN_ATP_PATH", ""),
+        "wta": os.environ.get("SACKMANN_WTA_PATH", ""),
+    }
+
+    def _read_csv(local_base: str, filename: str) -> Optional[str]:
+        """Return CSV text from local file, or HTTP, or None."""
+        if local_base:
+            fp = os.path.join(local_base, filename)
+            if os.path.isfile(fp):
+                with open(fp, "r", encoding="utf-8") as f:
+                    return f.read()
+        tour_name = filename.split("_")[0]
+        for branch in ("master", "main"):
+            url = (f"https://raw.githubusercontent.com/JeffSackmann/tennis_{tour_name}"
+                   f"/{branch}/{filename}")
+            try:
+                rp = requests.get(url, timeout=20, headers=http_headers)
+                if rp.status_code == 200:
+                    return rp.text
+            except Exception:
+                pass
+        return None
+
     for tour in ("atp", "wta"):
         try:
-            # Fetch player id→name lookup
-            for branch in ("master", "main"):
-                players_url = (f"https://raw.githubusercontent.com/JeffSackmann/tennis_{tour}"
-                               f"/{branch}/{tour}_players.csv")
-                rp = requests.get(players_url, timeout=20, headers=headers)
-                if rp.status_code == 200:
-                    break
-            else:
+            players_text = _read_csv(local_paths[tour], f"{tour}_players.csv")
+            if not players_text:
                 log.warning("fetch_current_rankings: %s players CSV not found", tour)
                 continue
             players: Dict[str, str] = {}
-            for row in csv.DictReader(io.StringIO(rp.text)):
-                pid = row.get("player_id", "").strip()
+            for row in csv.DictReader(io.StringIO(players_text)):
+                pid   = row.get("player_id", "").strip()
                 first = (row.get("name_first") or "").strip()
                 last  = (row.get("name_last")  or "").strip()
                 if pid and last:
                     players[pid] = f"{first} {last}".strip()
 
-            # Fetch current rankings
-            for branch in ("master", "main"):
-                rank_url = (f"https://raw.githubusercontent.com/JeffSackmann/tennis_{tour}"
-                            f"/{branch}/{tour}_rankings_current.csv")
-                rr = requests.get(rank_url, timeout=20, headers=headers)
-                if rr.status_code == 200:
-                    break
-            else:
+            rank_text = _read_csv(local_paths[tour], f"{tour}_rankings_current.csv")
+            if not rank_text:
                 log.warning("fetch_current_rankings: %s rankings CSV not found", tour)
                 continue
 
             count = 0
-            for row in csv.DictReader(io.StringIO(rr.text)):
+            for row in csv.DictReader(io.StringIO(rank_text)):
                 pid      = (row.get("player") or row.get("player_id") or "").strip()
                 rank_str = (row.get("rank") or "").strip()
                 if not pid or not rank_str:
@@ -2584,7 +2617,7 @@ def fetch_current_rankings() -> None:
                     continue
                 full_name = players.get(pid, "")
                 if full_name:
-                    key = norm_player(full_name)
+                    key = norm_player(full_name, tour=tour)
                     _LIVE_RANKS[key] = (rank, tour)
                     count += 1
             log.info("fetch_current_rankings: %s → %d players (top 600)", tour, count)
@@ -2594,18 +2627,36 @@ def fetch_current_rankings() -> None:
 
 def fetch_sackmann_matches(year: int = None) -> List[dict]:
     """
-    Download ATP + WTA match CSVs for current + previous 2 years.
-    Tries 'master' branch first, falls back to 'main'.
-    Uses GITHUB_TOKEN when available to avoid rate limiting.
+    Load ATP + WTA match CSVs for current + previous 2 years.
+    Reads from local cloned repo (SACKMANN_ATP/WTA_PATH env) first,
+    falls back to raw HTTP with GITHUB_TOKEN auth.
     """
     if year is None:
         year = datetime.datetime.utcnow().year
     gh_token = os.environ.get("GITHUB_TOKEN", "")
     req_headers: dict = {"Authorization": f"token {gh_token}"} if gh_token else {}
+    local_paths = {
+        "atp": os.environ.get("SACKMANN_ATP_PATH", ""),
+        "wta": os.environ.get("SACKMANN_WTA_PATH", ""),
+    }
     rows: List[dict] = []
     for y in [year, year - 1, year - 2]:
         for tour in ("atp", "wta"):
             fetched = False
+            # 1. Try local clone
+            local_file = os.path.join(local_paths[tour], f"{tour}_matches_{y}.csv") if local_paths[tour] else ""
+            if local_file and os.path.isfile(local_file):
+                try:
+                    with open(local_file, "r", encoding="utf-8") as f:
+                        batch = list(csv.DictReader(f))
+                    rows.extend(batch)
+                    log.info("fetch_sackmann: %s_%d (local) → %d rows", tour, y, len(batch))
+                    fetched = True
+                except Exception as e:
+                    log.warning("fetch_sackmann %s_%d local read error: %s", tour, y, e)
+            if fetched:
+                continue
+            # 2. Fall back to HTTP
             for branch in ("master", "main"):
                 url = (f"https://raw.githubusercontent.com/JeffSackmann/tennis_{tour}"
                        f"/{branch}/{tour}_matches_{y}.csv")
@@ -2620,7 +2671,7 @@ def fetch_sackmann_matches(year: int = None) -> List[dict]:
                 except Exception as e:
                     log.warning("fetch_sackmann %s_%d branch=%s: %s", tour, y, branch, e)
             if not fetched:
-                log.warning("fetch_sackmann %s_%d: not found on main or master", tour, y)
+                log.warning("fetch_sackmann %s_%d: not found locally or via HTTP", tour, y)
     log.info("fetch_sackmann total: %d rows across 3 years", len(rows))
     return rows
 
@@ -3742,8 +3793,9 @@ def run() -> None:
         best_of    = TOUR_META.get(t_lvl, {}).get("best_of", 3)
         tournament = extract_tournament(sport, odds_info)
 
-        p1_key = norm_player(odds_info["home"])
-        p2_key = norm_player(odds_info["away"])
+        _tour_hint = "wta" if "wta" in sport else "atp"
+        p1_key = norm_player(odds_info["home"], tour=_tour_hint)
+        p2_key = norm_player(odds_info["away"], tour=_tour_hint)
 
         pred = predict(p1_key, p2_key, surface, t_lvl, best_of,
                        sport_key=sport, tournament=tournament)
