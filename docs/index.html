@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ATP/WTA AI Prediction Platform</title>
+<title>ATP/WTA AI 網球預測平台</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root{
@@ -258,7 +258,7 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
 <!-- Loading -->
 <div id="loading">
   <div class="load-logo">TENNIS<span style="color:var(--gold)">AI</span></div>
-  <div style="font-size:.65rem;letter-spacing:3px;color:var(--muted)">ATP / WTA PREDICTION PLATFORM</div>
+  <div style="font-size:.65rem;letter-spacing:3px;color:var(--muted)">ATP / WTA 網球預測平台</div>
   <div class="load-bar"><div class="load-fill"></div></div>
 </div>
 
@@ -269,7 +269,7 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
 <nav>
   <div class="nav-logo">Tennis<span>AI</span></div>
   <div class="nav-right">
-    <div id="live-badge" class="live-badge" style="display:none"><span class="live-dot"></span>LIVE</div>
+    <div id="live-badge" class="live-badge" style="display:none"><span class="live-dot"></span>直播</div>
     <div class="nav-clock" id="nav-clock">--:--:-- TST</div>
   </div>
 </nav>
@@ -278,28 +278,28 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
 <section id="hero">
   <div class="hero-grid"></div>
   <div class="hero-orb"></div>
-  <div class="hero-label">AI-Powered Tennis Intelligence</div>
-  <h1 class="hero-title"><div class="g1">ATP / WTA</div><div class="g2">Prediction Platform</div></h1>
-  <p class="hero-sub" id="hero-sub">15-Factor ELO · Markov Chain · Kelly Criterion · Real-time Edge Detection</p>
+  <div class="hero-label">AI 智能網球預測系統</div>
+  <h1 class="hero-title"><div class="g1">ATP / WTA</div><div class="g2">網球預測平台</div></h1>
+  <p class="hero-sub" id="hero-sub">15因子 ELO · 馬可夫鏈 · Kelly 公式 · 即時優勢偵測</p>
   <div class="hero-metrics" id="hero-metrics">
-    <div class="hm-item"><div class="hm-value cyan" id="hm-wr">--%</div><div class="hm-label">Win Rate</div></div>
-    <div class="hm-item"><div class="hm-value green" id="hm-pnl">--u</div><div class="hm-label">P&amp;L Units</div></div>
-    <div class="hm-item"><div class="hm-value gold" id="hm-roi">--%</div><div class="hm-label">ROI</div></div>
-    <div class="hm-item"><div class="hm-value cyan" id="hm-picks">--</div><div class="hm-label">Picks Today</div></div>
+    <div class="hm-item"><div class="hm-value cyan" id="hm-wr">--%</div><div class="hm-label">勝率</div></div>
+    <div class="hm-item"><div class="hm-value green" id="hm-pnl">--u</div><div class="hm-label">損益</div></div>
+    <div class="hm-item"><div class="hm-value gold" id="hm-roi">--%</div><div class="hm-label">投報率</div></div>
+    <div class="hm-item"><div class="hm-value cyan" id="hm-picks">--</div><div class="hm-label">今日選注</div></div>
   </div>
   <div id="hero-edge-banner" class="hero-edge-banner" style="display:none">
     <div style="display:flex;flex-direction:column;gap:2px;align-items:center">
-      <div class="eb-label">Today's Best Edge</div>
+      <div class="eb-label">今日最佳優勢</div>
       <div class="eb-value" id="best-edge">+0.0%</div>
     </div>
     <div class="eb-sep"></div>
     <div style="display:flex;flex-direction:column;gap:2px;align-items:center">
-      <div class="eb-label">Model Confidence</div>
+      <div class="eb-label">模型信心</div>
       <div class="eb-value" style="color:var(--green)" id="best-conf">0.0%</div>
     </div>
     <div class="eb-sep"></div>
     <div style="display:flex;flex-direction:column;gap:2px;align-items:center">
-      <div class="eb-label">Kelly Stake</div>
+      <div class="eb-label">Kelly 投注</div>
       <div class="eb-value" style="color:var(--gold)" id="best-stake">0.0u</div>
     </div>
   </div>
@@ -312,9 +312,9 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
 <section id="picks-section">
   <div class="container">
     <div class="reveal">
-      <div class="section-label">AI Recommendations</div>
-      <h2 class="section-title">Today's Picks</h2>
-      <p class="section-sub" id="picks-sub">Model edge calculations updated in real-time</p>
+      <div class="section-label">AI 推薦選注</div>
+      <h2 class="section-title">今日選注</h2>
+      <p class="section-sub" id="picks-sub">模型優勢即時計算更新</p>
     </div>
     <div id="picks-container"></div>
   </div>
@@ -324,19 +324,19 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
 <section id="intel-section">
   <div class="container">
     <div class="reveal">
-      <div class="section-label">Match Intelligence</div>
-      <h2 class="section-title">All Matches</h2>
-      <p class="section-sub">Win probability computed by 15-factor ensemble model</p>
+      <div class="section-label">比賽分析</div>
+      <h2 class="section-title">所有比賽</h2>
+      <p class="section-sub">15因子集成模型計算勝率</p>
     </div>
     <div class="filter-bar reveal" id="intel-filters">
-      <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="grass">Grass</button>
-      <button class="filter-btn" data-filter="clay">Clay</button>
-      <button class="filter-btn" data-filter="hard">Hard</button>
-      <button class="filter-btn" data-filter="grandslam">Grand Slam</button>
+      <button class="filter-btn active" data-filter="all">全部</button>
+      <button class="filter-btn" data-filter="grass">草地</button>
+      <button class="filter-btn" data-filter="clay">紅土</button>
+      <button class="filter-btn" data-filter="hard">硬地</button>
+      <button class="filter-btn" data-filter="grandslam">大滿貫</button>
     </div>
     <div class="intel-grid" id="intel-grid"></div>
-    <button class="show-more-btn" id="show-more-btn" style="display:none">Show More Matches</button>
+    <button class="show-more-btn" id="show-more-btn" style="display:none">顯示更多比賽</button>
   </div>
 </section>
 
@@ -344,9 +344,9 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
 <section id="perf-section">
   <div class="container">
     <div class="reveal">
-      <div class="section-label">Performance Analytics</div>
-      <h2 class="section-title">Bloomberg Terminal</h2>
-      <p class="section-sub">Real-time statistical performance dashboard</p>
+      <div class="section-label">績效分析</div>
+      <h2 class="section-title">績效儀表板</h2>
+      <p class="section-sub">即時統計績效數據</p>
     </div>
     <div class="terminal-wrap reveal">
       <div class="terminal-top">
@@ -356,18 +356,18 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
       </div>
       <div class="perf-layout">
         <div class="perf-stats" id="perf-stats">
-          <div class="perf-stat-row"><span class="psr-label">SETTLED</span><span class="psr-val cyan" id="ps-settled">—</span></div>
-          <div class="perf-stat-row"><span class="psr-label">WINS</span><span class="psr-val green" id="ps-wins">—</span></div>
-          <div class="perf-stat-row"><span class="psr-label">WIN_RATE</span><span class="psr-val gold" id="ps-wr">—</span></div>
-          <div class="perf-stat-row"><span class="psr-label">TOTAL_PNL</span><span class="psr-val" id="ps-pnl">—</span></div>
-          <div class="perf-stat-row"><span class="psr-label">ROI</span><span class="psr-val" id="ps-roi">—</span></div>
-          <div class="perf-stat-row"><span class="psr-label">PICKS_TODAY</span><span class="psr-val cyan" id="ps-today">—</span></div>
+          <div class="perf-stat-row"><span class="psr-label">已結算</span><span class="psr-val cyan" id="ps-settled">—</span></div>
+          <div class="perf-stat-row"><span class="psr-label">贏注</span><span class="psr-val green" id="ps-wins">—</span></div>
+          <div class="perf-stat-row"><span class="psr-label">勝率</span><span class="psr-val gold" id="ps-wr">—</span></div>
+          <div class="perf-stat-row"><span class="psr-label">總損益</span><span class="psr-val" id="ps-pnl">—</span></div>
+          <div class="perf-stat-row"><span class="psr-label">投報率</span><span class="psr-val" id="ps-roi">—</span></div>
+          <div class="perf-stat-row"><span class="psr-label">今日選注</span><span class="psr-val cyan" id="ps-today">—</span></div>
         </div>
         <div class="chart-area">
           <div class="chart-tabs">
-            <button class="chart-tab active" data-chart="pnl">P&L</button>
-            <button class="chart-tab" data-chart="wr">Win Rate</button>
-            <button class="chart-tab" data-chart="edge">Edge</button>
+            <button class="chart-tab active" data-chart="pnl">損益</button>
+            <button class="chart-tab" data-chart="wr">勝率</button>
+            <button class="chart-tab" data-chart="edge">優勢</button>
           </div>
           <div class="chart-canvas-wrap"><canvas id="perf-chart"></canvas></div>
         </div>
@@ -380,9 +380,9 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
 <section id="model-section">
   <div class="container">
     <div class="reveal">
-      <div class="section-label">AI Architecture</div>
-      <h2 class="section-title">15-Factor Model</h2>
-      <p class="section-sub">Ensemble of ELO, Markov, surface & physical analytics</p>
+      <div class="section-label">AI 模型架構</div>
+      <h2 class="section-title">15因子預測模型</h2>
+      <p class="section-sub">ELO · 馬可夫 · 場地 · 體能多因子集成</p>
     </div>
     <div class="model-grid" id="model-grid"></div>
   </div>
@@ -392,20 +392,20 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
 <section id="history-section">
   <div class="container">
     <div class="reveal">
-      <div class="section-label">Track Record</div>
-      <h2 class="section-title">Bet History</h2>
-      <p class="section-sub">Verified prediction log with outcomes</p>
+      <div class="section-label">歷史紀錄</div>
+      <h2 class="section-title">投注紀錄</h2>
+      <p class="section-sub">已驗證的預測紀錄與結果</p>
     </div>
     <div class="history-wrap reveal">
       <div class="history-header">
-        <span class="hh-col">Match</span>
-        <span class="hh-col">Bet On</span>
-        <span class="hh-col">Odds</span>
-        <span class="hh-col">Edge</span>
-        <span class="hh-col">Stake</span>
-        <span class="hh-col">Surface</span>
-        <span class="hh-col">Tour</span>
-        <span class="hh-col">Result</span>
+        <span class="hh-col">比賽</span>
+        <span class="hh-col">押注</span>
+        <span class="hh-col">賠率</span>
+        <span class="hh-col">優勢</span>
+        <span class="hh-col">單位</span>
+        <span class="hh-col">場地</span>
+        <span class="hh-col">賽事</span>
+        <span class="hh-col">結果</span>
       </div>
       <div id="history-rows"></div>
     </div>
@@ -416,9 +416,9 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
 <section id="live-section" style="display:none">
   <div class="container">
     <div class="reveal">
-      <div class="section-label" style="color:var(--red)">Live Now</div>
-      <h2 class="section-title">In-Progress Matches</h2>
-      <p class="section-sub">Real-time scores from active court sessions</p>
+      <div class="section-label" style="color:var(--red)">進行中</div>
+      <h2 class="section-title">即時比賽</h2>
+      <p class="section-sub">即時賽場比分</p>
     </div>
     <div class="live-grid" id="live-grid"></div>
   </div>
@@ -426,10 +426,10 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
 
 <!-- Footer -->
 <footer>
-  <div class="footer-logo">TENNISAI PLATFORM</div>
+  <div class="footer-logo">TENNISAI 預測平台</div>
   <div class="footer-copy">
-    Data powered by The Odds API · Model: 15-Factor ELO + Markov Chain Ensemble<br>
-    For informational purposes only. Past performance does not guarantee future results.<br>
+    資料來源：The Odds API · 模型：15因子 ELO + 馬可夫鏈集成<br>
+    僅供參考，過去績效不代表未來結果。<br>
     <span id="footer-gen">—</span>
   </div>
 </footer>
@@ -480,9 +480,11 @@ document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
 /* ── HELPERS ── */
 function initials(n){return n.split(' ').map(w=>w[0]||'').slice(0,2).join('').toUpperCase()||'?'}
 function surfClass(s){const m={'grass':'surf-grass','clay':'surf-clay','hard':'surf-hard','carpet':'surf-carpet'};return m[(s||'').toLowerCase()]||'surf-hard'}
-function surfLabel(s){return(s||'').charAt(0).toUpperCase()+(s||'').slice(1)||'Hard'}
-function fmtPct(v){return(v*100).toFixed(1)+'%'}
-function fmtEdge(v){return(v>=0?'+':'')+fmtPct(v)}
+function surfLabel(s){const m={'grass':'草地','clay':'紅土','hard':'硬地','carpet':'地毯'};return m[(s||'').toLowerCase()]||(s?s.charAt(0).toUpperCase()+s.slice(1):'硬地')}
+function resultLabel(r){return r==='win'?'贏':r==='loss'?'輸':r==='push'?'平':'?'}
+function tierLabel(t){return t==='A'?'精選':t==='B'?'推薦':'普通'}
+function fmtPct(v){return(+v||0).toFixed(1)+'%'}
+function fmtEdge(v){return(v>=0?'+':'')+(+v||0).toFixed(1)+'%'}
 
 /* ── CHART STATE ── */
 let chartInstance=null,chartData={pnl:[],wr:[],edge:[]},chartLabels=[];
@@ -508,22 +510,22 @@ document.querySelectorAll('.chart-tab').forEach(btn=>{
 
 /* ── MODEL FACTORS ── */
 const MODEL_FACTORS=[
-  {icon:'⚡',name:'ELO Rating',desc:'Dynamic surface-specific player strength ratings updated after every match',weight:18},
-  {icon:'🎯',name:'Markov Chain',desc:'Point-level game simulation modeling service patterns and break tendencies',weight:16},
-  {icon:'🏆',name:'Surface Analytics',desc:'Clay / Grass / Hard court performance differential over 3-year window',weight:13},
-  {icon:'💪',name:'Physical Form',desc:'Recent match load, fatigue index, and recovery time between matches',weight:12},
-  {icon:'🧠',name:'H2H Psychology',desc:'Head-to-head history weighted by recency and surface similarity',weight:10},
-  {icon:'📊',name:'Serve/Return',desc:'First serve %, return points won, break point conversion rates',weight:10},
-  {icon:'🌍',name:'Tournament Context',desc:'Grand Slam vs Tour 250/500 pressure calibration and prize motivation',weight:8},
-  {icon:'🩹',name:'Injury Adjustment',desc:'Known injury reports and ATP/WTA physical condition signals',weight:7},
-  {icon:'📈',name:'Kelly Criterion',desc:'Optimal stake sizing based on edge magnitude and bankroll theory',weight:6},
+  {icon:'⚡',name:'ELO 評分',desc:'依場地動態更新的球員強度評分，每場比賽後即時調整',weight:18},
+  {icon:'🎯',name:'馬可夫鏈',desc:'以分為單位模擬比賽，分析發球模式與破發傾向',weight:16},
+  {icon:'🏆',name:'場地分析',desc:'紅土 / 草地 / 硬地三年窗口績效差異',weight:13},
+  {icon:'💪',name:'體能狀態',desc:'近期賽程負擔、疲勞指數與賽間恢復時間',weight:12},
+  {icon:'🧠',name:'對戰心理',desc:'依時間近遠與場地相似度加權的對戰歷史',weight:10},
+  {icon:'📊',name:'發球/接發',desc:'一發進球率、接發得分率、破發點轉換率',weight:10},
+  {icon:'🌍',name:'賽事背景',desc:'大滿貫 vs 巡迴賽壓力校準與獎金動機',weight:8},
+  {icon:'🩹',name:'傷病調整',desc:'已知傷病報告與 ATP/WTA 體能狀況信號',weight:7},
+  {icon:'📈',name:'Kelly 公式',desc:'依優勢大小與資金理論計算最佳投注比例',weight:6},
 ];
 
 function renderModelGrid(){
   const g=document.getElementById('model-grid');
   MODEL_FACTORS.forEach(f=>{
     const d=document.createElement('div');d.className='model-card reveal';
-    d.innerHTML=`<div class="mc-icon">${f.icon}</div><div class="mc-name">${f.name}</div><div class="mc-desc">${f.desc}</div><div class="mc-weight-row"><span class="mc-weight-label">Weight</span><div class="mc-bar"><div class="mc-fill" style="width:0" data-w="${f.weight}"></div></div><span class="mc-pct">${f.weight}%</span></div>`;
+    d.innerHTML=`<div class="mc-icon">${f.icon}</div><div class="mc-name">${f.name}</div><div class="mc-desc">${f.desc}</div><div class="mc-weight-row"><span class="mc-weight-label">權重</span><div class="mc-bar"><div class="mc-fill" style="width:0" data-w="${f.weight}"></div></div><span class="mc-pct">${f.weight}%</span></div>`;
     g.appendChild(d);observer.observe(d);
   });
   setTimeout(()=>{document.querySelectorAll('.mc-fill').forEach(el=>{el.style.width=el.dataset.w+'%'})},600);
@@ -567,7 +569,7 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
   roiEl.className='psr-val '+(roi>=0?'green':'red');
   document.getElementById('ps-today').textContent=picks.length;
   document.getElementById('term-update').textContent=data.generated_at||'—';
-  document.getElementById('footer-gen').textContent='Generated '+( data.generated_at||'—');
+  document.getElementById('footer-gen').textContent='生成時間：'+( data.generated_at||'—');
 
   // Chart from history
   if(history.length>0){
@@ -578,20 +580,20 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
       cumPnl+=win?stake*(price-1):-stake;
       chartLabels.push(h.date?h.date.slice(5):'');
       chartData.pnl.push(+cumPnl.toFixed(2));
-      chartData.wr.push(+((h.model_p||0)*100).toFixed(1));
-      chartData.edge.push(+((h.edge||0)*100).toFixed(2));
+      chartData.wr.push(+(h.model_p||0).toFixed(1));
+      chartData.edge.push(+(h.edge||0).toFixed(2));
     });
     buildChart('pnl');
   }
 
   // Ticker
   const tickerItems=[
-    {label:'WIN RATE',val:stats.win_rate?fmtPct(stats.win_rate):'—',up:true},
-    {label:'P&L',val:pnl>=0?'+'+pnl.toFixed(2)+'u':pnl.toFixed(2)+'u',up:pnl>=0},
-    {label:'ROI',val:fmtEdge(roi),up:roi>=0},
-    {label:'PICKS TODAY',val:picks.length,up:true},
-    {label:'SETTLED',val:stats.settled||0,up:true},
-    {label:'MODEL',val:data.model_version||'v1',up:true},
+    {label:'勝率',val:stats.win_rate?fmtPct(stats.win_rate):'—',up:true},
+    {label:'損益',val:pnl>=0?'+'+pnl.toFixed(2)+'u':pnl.toFixed(2)+'u',up:pnl>=0},
+    {label:'投報率',val:fmtEdge(roi),up:roi>=0},
+    {label:'今日選注',val:picks.length,up:true},
+    {label:'已結算',val:stats.settled||0,up:true},
+    {label:'模型',val:data.model_version||'v1',up:true},
   ];
   const t=document.getElementById('ticker');
   const inner=tickerItems.map(i=>`<span class="ticker-item"><span class="t-name">${i.label}</span><span class="${i.up?'t-up':'t-dn'}">${i.val}</span></span>`).join('');
@@ -599,9 +601,9 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
 
   // Picks section
   const picksContainer=document.getElementById('picks-container');
-  document.getElementById('picks-sub').textContent=`${picks.length} recommendation${picks.length!==1?'s':''} · ${data.date||'today'}`;
+  document.getElementById('picks-sub').textContent=`今日 ${picks.length} 注推薦 · ${data.date||'今天'}`;
   if(picks.length===0){
-    picksContainer.innerHTML=`<div class="no-picks"><div class="no-picks-icon">🔍</div><h3>No picks available today</h3><p>Model requires minimum ${(0.06*100).toFixed(0)}% edge threshold. All matches screened — no qualifying opportunities found.</p></div>`;
+    picksContainer.innerHTML=`<div class="no-picks"><div class="no-picks-icon">🔍</div><h3>今日暫無推薦選注</h3><p>模型需最低 ${(0.06*100).toFixed(0)}% 優勢門檻，所有比賽已篩選，未發現符合條件的機會。</p></div>`;
   } else {
     const grid=document.createElement('div');grid.className='picks-grid';
     picks.forEach(p=>{
@@ -609,14 +611,14 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
       const isBetHome=p.bet_on===p.p1;
       const betAvatar=initials(p.bet_on||'');
       const oppAvatar=initials((isBetHome?p.p2:p.p1)||'');
-      const modelP=p.model_p||0.5;
-      const oppP=1-modelP;
+      const modelP=p.model_p||50;
+      const oppP=100-modelP;
       const surf=p.surface||'hard';
       const card=document.createElement('div');
       card.className=`pick-card tier-${tier} reveal`;
       card.innerHTML=`
         <div class="pick-top">
-          <span class="tier-badge ${tier}">TIER ${tier}</span>
+          <span class="tier-badge ${tier}">${tierLabel(tier)}</span>
           <span class="surface-chip ${surfClass(surf)}">${surfLabel(surf)}</span>
         </div>
         <div class="players-row">
@@ -634,14 +636,14 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
         </div>
         <div class="prob-row">
           <span style="min-width:36px;font-size:.68rem;color:var(--muted)">${fmtPct(modelP)}</span>
-          <div class="prob-bar-wrap"><div class="prob-fill p1" style="width:${modelP*100}%"></div></div>
+          <div class="prob-bar-wrap"><div class="prob-fill p1" style="width:${modelP}%"></div></div>
           <span style="min-width:36px;font-size:.68rem;color:var(--muted);text-align:right">${fmtPct(oppP)}</span>
         </div>
         <div class="pick-metrics">
-          <div class="pm-item"><div class="pm-label">Edge</div><div class="pm-val green">${fmtEdge(p.edge||0)}</div></div>
-          <div class="pm-item"><div class="pm-label">Odds</div><div class="pm-val gold">${(p.price||0).toFixed(2)}</div></div>
-          <div class="pm-item"><div class="pm-label">Stake</div><div class="pm-val cyan">${(p.stake||0).toFixed(1)}u</div></div>
-          <div class="pm-item"><div class="pm-label">Bet On</div><div class="pm-val" style="font-size:.8rem">${(p.bet_on||'—').split(' ').pop()}</div></div>
+          <div class="pm-item"><div class="pm-label">優勢</div><div class="pm-val green">${fmtEdge(p.edge||0)}</div></div>
+          <div class="pm-item"><div class="pm-label">賠率</div><div class="pm-val gold">${(p.best_price||p.price||0).toFixed(2)}</div></div>
+          <div class="pm-item"><div class="pm-label">投注</div><div class="pm-val cyan">${(p.stake||0).toFixed(1)}u</div></div>
+          <div class="pm-item"><div class="pm-label">押注</div><div class="pm-val" style="font-size:.8rem">${(p.bet_on||'—').split(' ').pop()}</div></div>
         </div>
       `;
       grid.appendChild(card);observer.observe(card);
@@ -665,7 +667,7 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
     });
     const visible=filtered.slice(0,visibleCount);
     visible.forEach(m=>{
-      const p1w=m.model_p1||0.5;const p2w=1-p1w;
+      const p1w=(m.model_p1||0.5)*100;const p2w=100-p1w;
       const card=document.createElement('div');
       card.className='intel-card reveal';
       card.innerHTML=`
@@ -682,7 +684,7 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
         </div>
         <div class="ic-prob-row">
           <span class="ic-pct">${fmtPct(p1w)}</span>
-          <div class="ic-bar"><div class="ic-fill" style="width:${p1w*100}%"></div></div>
+          <div class="ic-bar"><div class="ic-fill" style="width:${p1w}%"></div></div>
           <span style="color:var(--muted);font-size:.7rem;min-width:36px;text-align:right">${fmtPct(p2w)}</span>
         </div>
       `;
@@ -699,12 +701,12 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
   });
   showMoreBtn.addEventListener('click',()=>{visibleCount+=12;renderIntel()});
   if(allMatches.length>0)renderIntel();
-  else intelGrid.innerHTML='<p style="color:var(--muted);font-size:.85rem;grid-column:1/-1;text-align:center;padding:40px">No match data available</p>';
+  else intelGrid.innerHTML='<p style="color:var(--muted);font-size:.85rem;grid-column:1/-1;text-align:center;padding:40px">暫無比賽資料</p>';
 
   // History
   const histRows=document.getElementById('history-rows');
   if(history.length===0){
-    histRows.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);font-size:.85rem">No history yet</div>';
+    histRows.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);font-size:.85rem">尚無歷史紀錄</div>';
   } else {
     history.slice().reverse().forEach(h=>{
       const win=h.result==='win';const loss=h.result==='loss';
@@ -717,7 +719,7 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
         <span class="hr-val">${(h.stake||0).toFixed(1)}u</span>
         <span class="surface-chip ${surfClass(h.surface)}" style="font-size:.6rem;padding:2px 7px;display:inline-block">${surfLabel(h.surface)}</span>
         <span class="hr-val" style="text-transform:uppercase;letter-spacing:1px">${h.tour||'—'}</span>
-        <span class="result-badge ${win?'rb-win':loss?'rb-loss':'rb-push'}">${h.result||'?'}</span>
+        <span class="result-badge ${win?'rb-win':loss?'rb-loss':'rb-push'}">${resultLabel(h.result)}</span>
       `;
       histRows.appendChild(row);
     });
@@ -733,7 +735,7 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
       card.innerHTML=`
         <div class="lc-header">
           <span class="lc-sport">${m.sport_title||'Tennis'}</span>
-          <span class="lc-live"><span class="live-dot"></span>LIVE</span>
+          <span class="lc-live"><span class="live-dot"></span>直播</span>
         </div>
         <div class="lc-match">
           <div class="lc-player"><span class="lc-name">${m.home||'—'}</span></div>
@@ -751,7 +753,7 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
 
 }).catch(err=>{
   console.error('Failed to load picks_latest.json',err);
-  document.getElementById('picks-container').innerHTML='<div class="no-picks"><div class="no-picks-icon">⚠️</div><h3>Data unavailable</h3><p>Could not load prediction data. Please try again later.</p></div>';
+  document.getElementById('picks-container').innerHTML='<div class="no-picks"><div class="no-picks-icon">⚠️</div><h3>資料載入失敗</h3><p>無法載入預測資料，請稍後再試。</p></div>';
 });
 </script>
 </body>
