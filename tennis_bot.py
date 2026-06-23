@@ -1205,6 +1205,7 @@ _SACKMANN_PROFILES: Dict[str, dict]  = {}
 _ODDS_PREV:         Dict[str, dict]  = {}  # previous run odds for movement detection
 _DYNAMIC_H2H:         Dict[Tuple[str, str, str], Tuple[int, int]] = {}  # (p1,p2,surf)→(w1,w2)
 _DYNAMIC_H2H_OVERALL: Dict[Tuple[str, str],       Tuple[int, int]] = {}  # (p1,p2)→(w1,w2)
+_LIVE_RANKS: Dict[str, Tuple[int, str]] = {}  # norm_key → (current_rank, "atp"|"wta")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # MARKOV CHAIN TENNIS MODEL
@@ -2383,8 +2384,15 @@ def get_surface_stats(key: str, surface: str) -> dict:
     players = {**ATP_STATS, **WTA_STATS}
     surf = surface if surface in ("hard", "clay", "grass") else "hard"
     has_static = key in players
-    base = dict(players.get(key, {}).get(surf,
-           {"svpt_won": 0.610, "rtpt_won": 0.330, "elo": 1500}))
+
+    # If not in static database, check live rankings for rank-based stats
+    if not has_static and key in _LIVE_RANKS:
+        rank, tour = _LIVE_RANKS[key]
+        base = _rank_based_stats(rank, surf, tour)
+    else:
+        base = dict(players.get(key, {}).get(surf,
+               {"svpt_won": 0.610, "rtpt_won": 0.330, "elo": 1500}))
+
     live_elo = _LIVE_ELO.get(key, {}).get(surf)
     if live_elo:
         base["elo"] = live_elo
@@ -2440,9 +2448,10 @@ def infer_tour_level(sport_key: str, tournament: str = "") -> str:
 
 
 def data_quality_score(key: str) -> float:
-    """0.2=generic fallback only, 0.6=Sackmann only, 1.0=full static+Sackmann"""
+    """0.2=generic fallback only, 0.65=live rank only, 0.72=static only, 1.0=full static+Sackmann"""
     static = {**ATP_STATS, **WTA_STATS}
     has_static = key in static
+    has_live_rank = key in _LIVE_RANKS
     prof = _SACKMANN_PROFILES.get(key, {})
     n = prof.get("n_matches", 0)
     if has_static and n >= 10:
@@ -2453,6 +2462,14 @@ def data_quality_score(key: str) -> float:
         return 0.80
     if has_static:
         return 0.72
+    if has_live_rank and n >= 10:
+        return 0.75
+    if has_live_rank and n >= 5:
+        return 0.68
+    if has_live_rank and n >= 1:
+        return 0.65
+    if has_live_rank:
+        return 0.62  # live rank, no match data — still better than pure fallback
     if n >= 10:
         return 0.65
     if n >= 5:
@@ -2500,22 +2517,100 @@ def _name_matches(csv_name: str, full_name: str) -> bool:
     return True
 
 
+def _rank_based_stats(rank: int, surface: str, tour: str) -> dict:
+    """Compute estimated ELO/serve/return stats from current ranking."""
+    surf = surface if surface in ("hard", "clay", "grass") else "hard"
+    r = max(1, rank)
+    if tour == "wta":
+        hard_elo = max(1550, 1950 - max(0, r - 10) * 2.8)
+        svpt_won = max(0.520, 0.582 - r * 0.0007)
+        rtpt_won = max(0.340, 0.418 - r * 0.0006)
+        elo_offsets = {"hard": 0, "clay": -15, "grass": -20}
+    else:
+        hard_elo = max(1600, 1950 - max(0, r - 10) * 2.5)
+        svpt_won = max(0.590, 0.655 - r * 0.0006)
+        rtpt_won = max(0.315, 0.365 - r * 0.0005)
+        elo_offsets = {"hard": 0, "clay": -20, "grass": -25}
+    elo = hard_elo + elo_offsets.get(surf, 0)
+    return {"svpt_won": round(svpt_won, 4), "rtpt_won": round(rtpt_won, 4), "elo": round(elo, 1)}
+
+
+def fetch_current_rankings() -> None:
+    """Fetch current ATP/WTA rankings from Jeff Sackmann's GitHub repos."""
+    gh_token = os.environ.get("GITHUB_TOKEN", "")
+    headers: dict = {"Authorization": f"token {gh_token}"} if gh_token else {}
+    for tour in ("atp", "wta"):
+        try:
+            # Fetch player id→name lookup
+            for branch in ("master", "main"):
+                players_url = (f"https://raw.githubusercontent.com/JeffSackmann/tennis_{tour}"
+                               f"/{branch}/{tour}_players.csv")
+                rp = requests.get(players_url, timeout=20, headers=headers)
+                if rp.status_code == 200:
+                    break
+            else:
+                log.warning("fetch_current_rankings: %s players CSV not found", tour)
+                continue
+            players: Dict[str, str] = {}
+            for row in csv.DictReader(io.StringIO(rp.text)):
+                pid = row.get("player_id", "").strip()
+                first = (row.get("name_first") or "").strip()
+                last  = (row.get("name_last")  or "").strip()
+                if pid and last:
+                    players[pid] = f"{first} {last}".strip()
+
+            # Fetch current rankings
+            for branch in ("master", "main"):
+                rank_url = (f"https://raw.githubusercontent.com/JeffSackmann/tennis_{tour}"
+                            f"/{branch}/{tour}_rankings_current.csv")
+                rr = requests.get(rank_url, timeout=20, headers=headers)
+                if rr.status_code == 200:
+                    break
+            else:
+                log.warning("fetch_current_rankings: %s rankings CSV not found", tour)
+                continue
+
+            count = 0
+            for row in csv.DictReader(io.StringIO(rr.text)):
+                pid      = (row.get("player") or row.get("player_id") or "").strip()
+                rank_str = (row.get("rank") or "").strip()
+                if not pid or not rank_str:
+                    continue
+                try:
+                    rank = int(rank_str)
+                except ValueError:
+                    continue
+                if rank > 600:
+                    continue
+                full_name = players.get(pid, "")
+                if full_name:
+                    key = norm_player(full_name)
+                    _LIVE_RANKS[key] = (rank, tour)
+                    count += 1
+            log.info("fetch_current_rankings: %s → %d players (top 600)", tour, count)
+        except Exception as e:
+            log.warning("fetch_current_rankings %s: %s", tour, e)
+
+
 def fetch_sackmann_matches(year: int = None) -> List[dict]:
     """
     Download ATP + WTA match CSVs for current + previous 2 years.
-    Tries 'main' branch first (Sackmann renamed master→main), falls back to 'master'.
+    Tries 'master' branch first, falls back to 'main'.
+    Uses GITHUB_TOKEN when available to avoid rate limiting.
     """
     if year is None:
         year = datetime.datetime.utcnow().year
+    gh_token = os.environ.get("GITHUB_TOKEN", "")
+    req_headers: dict = {"Authorization": f"token {gh_token}"} if gh_token else {}
     rows: List[dict] = []
     for y in [year, year - 1, year - 2]:
         for tour in ("atp", "wta"):
             fetched = False
-            for branch in ("main", "master"):
+            for branch in ("master", "main"):
                 url = (f"https://raw.githubusercontent.com/JeffSackmann/tennis_{tour}"
                        f"/{branch}/{tour}_matches_{y}.csv")
                 try:
-                    r = requests.get(url, timeout=25)
+                    r = requests.get(url, timeout=25, headers=req_headers)
                     r.raise_for_status()
                     batch = list(csv.DictReader(io.StringIO(r.text)))
                     rows.extend(batch)
@@ -3611,6 +3706,10 @@ def write_json(picks: List[dict], stats: dict, history: dict,
 def run() -> None:
     now_tw = datetime.datetime.utcnow() + datetime.timedelta(hours=8)
     log.info("=== Tennis Bot v4.0 start %s ===", now_tw.strftime("%Y-%m-%d %H:%M"))
+
+    # Fetch current ATP/WTA rankings for dynamic rank-based stats on any player
+    fetch_current_rankings()
+    log.info("Live ranks loaded: %d players", len(_LIVE_RANKS))
 
     all_matches_raw = fetch_sackmann_matches()
 

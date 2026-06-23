@@ -39,6 +39,7 @@ jobs:
           GIST_TOKEN:      ${{ secrets.GIST_TOKEN }}
           GIST_ID:         ${{ secrets.GIST_ID }}
           NTFY_TOPIC:      ${{ secrets.NTFY_TOPIC }}
+          GITHUB_TOKEN:    ${{ secrets.GITHUB_TOKEN }}
         run: python tennis_bot.py
 
       - name: Commit updated picks
