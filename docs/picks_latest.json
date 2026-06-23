@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-06-23 17:19 (台灣時間)",
-  "generated_at_iso": "2026-06-23T17:19:57+08:00",
+  "generated_at": "2026-06-23 17:52 (台灣時間)",
+  "generated_at_iso": "2026-06-23T17:52:48+08:00",
   "date": "2026-06-23",
   "model_version": "v4.0 — PowerDevig+DynH2H+ExpForm+RecencyELO+ProbCalib+15factor",
   "stats": {
@@ -112,7 +112,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 42.3
+      "exp_games": 42.7
     },
     "anouk koevermans|mananchaya sawangkaew": {
       "p1": "Anouk Koevermans",
@@ -123,7 +123,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.2
+      "exp_games": 43.3
     },
     "celine naef|joanna garland": {
       "p1": "Celine Naef",
@@ -134,7 +134,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.4
+      "exp_games": 43.3
     },
     "dominika šalková|iryna shymanovich": {
       "p1": "Dominika Šalková",
@@ -156,7 +156,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.2
+      "exp_games": 43.5
     },
     "harmony tan|mia pohánková": {
       "p1": "Harmony Tan",
@@ -167,7 +167,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.2
+      "exp_games": 43.5
     },
     "laura pigossi|oceane dodin": {
       "p1": "Laura Pigossi",
@@ -178,7 +178,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.4
+      "exp_games": 43.0
     },
     "lulu sun|linda klimovicova": {
       "p1": "Lulu Sun",
@@ -189,7 +189,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.1
+      "exp_games": 43.0
     },
     "noma noha akugue|lisa pigato": {
       "p1": "Noma Noha Akugue",
@@ -200,7 +200,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.4
+      "exp_games": 43.3
     },
     "tyra caterina grant|taylah preston": {
       "p1": "Tyra Caterina Grant",
@@ -222,7 +222,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.4
+      "exp_games": 43.3
     },
     "cadence brace|kayla day": {
       "p1": "Cadence Brace",
@@ -233,7 +233,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.3
+      "exp_games": 43.2
     },
     "despina papamichail|claire liu": {
       "p1": "Despina Papamichail",
@@ -244,7 +244,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.4
+      "exp_games": 42.9
     },
     "dalma galfi|francisca jorge": {
       "p1": "Dalma Galfi",
@@ -255,7 +255,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.2
+      "exp_games": 43.1
     },
     "linda fruhvirtova|emerson jones": {
       "p1": "Linda Fruhvirtova",
@@ -266,7 +266,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.6
+      "exp_games": 43.3
     },
     "ma yexin|erika andreeva": {
       "p1": "Ma Yexin",
@@ -277,7 +277,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 42.5
+      "exp_games": 42.1
     },
     "kaitlin quevedo|sayaka ishii": {
       "p1": "Kaitlin Quevedo",
@@ -288,7 +288,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.2
+      "exp_games": 43.3
     },
     "katarzyna kawa|susan bandecchi": {
       "p1": "Katarzyna Kawa",
@@ -299,7 +299,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.3
+      "exp_games": 43.2
     },
     "maddison inglis|lucia bronzetti": {
       "p1": "Maddison Inglis",
@@ -310,7 +310,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.3
+      "exp_games": 43.0
     },
     "luisina giovannini|lucrezia stefanini": {
       "p1": "Luisina Giovannini",
@@ -332,7 +332,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.2
+      "exp_games": 43.3
     },
     "elizabeth mandlik|alina charaeva": {
       "p1": "Elizabeth Mandlik",
@@ -343,7 +343,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.2
+      "exp_games": 43.4
     },
     "anna-lena friedsam|clervie ngounoue": {
       "p1": "Anna-Lena Friedsam",
@@ -354,7 +354,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.4
+      "exp_games": 43.2
     },
     "ashlyn krueger|gabriela knutson": {
       "p1": "Ashlyn Krueger",
@@ -365,7 +365,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.3
+      "exp_games": 43.1
     },
     "bianca andreescu|polona hercog": {
       "p1": "Bianca Andreescu",
@@ -387,7 +387,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 42.3
+      "exp_games": 42.2
     },
     "rebeka masarova|jil teichmann": {
       "p1": "Rebeka Masarova",
@@ -398,7 +398,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.3
+      "exp_games": 43.4
     },
     "katie volynets|laura samson": {
       "p1": "Katie Volynets",
@@ -431,7 +431,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.3
+      "exp_games": 42.9
     },
     "storm hunter|sofia costoulas": {
       "p1": "Storm Hunter",
@@ -442,7 +442,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.3
+      "exp_games": 43.6
     },
     "zhuoxuan bai|tamara zidansek": {
       "p1": "Zhuoxuan Bai",
@@ -464,7 +464,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.4
+      "exp_games": 43.1
     },
     "carole monnet|tatiana prozorova": {
       "p1": "Carole Monnet",
@@ -475,7 +475,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.1
+      "exp_games": 43.2
     },
     "xiyu wang|guo hanyu": {
       "p1": "Xiyu Wang",
@@ -486,7 +486,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 42.2
+      "exp_games": 41.9
     },
     "heather watson|mayar sherif": {
       "p1": "Heather Watson",
@@ -497,7 +497,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.2
+      "exp_games": 43.1
     },
     "julia grabher|mariam bolkvadze": {
       "p1": "Julia Grabher",
@@ -508,7 +508,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.1
+      "exp_games": 43.3
     },
     "mona barthel|lin zhu": {
       "p1": "Mona Barthel",
@@ -519,7 +519,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.5
+      "exp_games": 43.1
     },
     "lola radivojevic|marina bassols ribera": {
       "p1": "Lola Radivojevic",
@@ -530,7 +530,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.3
+      "exp_games": 43.0
     },
     "maria lourdes carle|lucie havlickova": {
       "p1": "Maria Lourdes Carle",
@@ -541,7 +541,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.1
+      "exp_games": 43.2
     },
     "maria timofeeva|whitney osuigwe": {
       "p1": "Maria Timofeeva",
@@ -563,7 +563,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.0
+      "exp_games": 43.2
     },
     "mai hontama|akasha urhobo": {
       "p1": "Mai Hontama",
@@ -574,7 +574,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.1
+      "exp_games": 43.5
     },
     "alice tubello|elena pridankina": {
       "p1": "Alice Tubello",
@@ -585,7 +585,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.3
+      "exp_games": 43.4
     },
     "caroline dolehide|robin montgomery": {
       "p1": "Caroline Dolehide",
@@ -596,7 +596,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.2
+      "exp_games": 43.3
     },
     "priscilla hon|nao hibino": {
       "p1": "Priscilla Hon",
@@ -607,7 +607,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.2
+      "exp_games": 43.5
     },
     "fiona crawley|himeno sakatsume": {
       "p1": "Fiona Crawley",
@@ -618,7 +618,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.1
+      "exp_games": 43.4
     },
     "kayla cross|mary stoiana": {
       "p1": "Kayla Cross",
@@ -629,7 +629,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.3
+      "exp_games": 43.0
     }
   }
 }
