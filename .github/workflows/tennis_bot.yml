@@ -1,7 +1,17 @@
 name: Tennis Bot
 
 on:
+  # 每天台灣時間 07:00 / 13:00 / 19:00 自動執行（= UTC 23/05/11）
+  schedule:
+    - cron: "0 23 * * *"   # 台灣 07:00
+    - cron: "0 5  * * *"   # 台灣 13:00
+    - cron: "0 11 * * *"   # 台灣 19:00
   workflow_dispatch:
+    inputs:
+      run_backtest:
+        description: "Also run backtest validation?"
+        required: false
+        default: "false"
 
 jobs:
   predict:
@@ -56,3 +66,57 @@ jobs:
             -f "content=$(base64 -w 0 docs/picks_latest.json)" \
             -f sha="$SHA" \
             -f branch="main" || echo "Warning: could not sync picks to main"
+
+  # 每週一 UTC 03:00 自動執行回測，或手動觸發時選擇
+  backtest:
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'schedule' && github.event.schedule == '0 3 * * 1' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.run_backtest == 'true')
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Backtest
+        id: backtest
+        run: |
+          python backtest.py
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Show Backtest Summary
+        if: always()
+        run: |
+          if [ -f docs/backtest_results.json ]; then
+            echo "=== BACKTEST RESULTS ==="
+            python3 -c "
+          import json
+          with open('docs/backtest_results.json') as f: m=json.load(f)
+          ov=m['overall']; bm=m['benchmarks']
+          print(f'Verdict:   {m[\"verdict\"]}')
+          print(f'Accuracy:  {ov[\"accuracy\"]}%  (random: {bm[\"random_accuracy\"]})')
+          print(f'Brier:     {ov[\"brier_score\"]}  (random: {ov[\"random_brier\"]})')
+          print(f'Log-Loss:  {ov[\"log_loss\"]}')
+          print(f'Improvement vs random Brier: {ov[\"brier_improvement_vs_random\"]}')
+          "
+          fi
+
+      - name: Commit backtest results
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/backtest_results.json 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "chore: update backtest results [skip ci]"
+          git push origin HEAD:main || echo "Nothing to push"
