@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-Tennis Bot v3.2 — ATP/WTA 巡迴賽預測系統
-9因子模型：Surface ELO 25% + Markov Chain 25% + Hold/Break 20% + Advanced Stats 30%
-附加調整：體能(年齡加權) ±10% | 場地狀態 ±5% | H2H ±5% | 搶七/關鍵分 ±7%
-         雙誤懲罰 ±4% | 左手剋制 ±3% | 反拍剋制 ±2% | 室內場速(進入發球模型)
-資料來源：Jeff Sackmann ATP/WTA CSVs + The Odds API
+Tennis Bot v4.0 — ATP/WTA 巡迴賽預測系統
+核心模型：Surface ELO(近期加權) 25% + Markov Chain 25% + Hold/Break 20% + Advanced Stats 30%
+調整因子：體能(年齡加權) | 球場速度 | H2H(動態) | 搶七/關鍵分 | 雙誤 | 左手 | 反拍
+          高度 | 風速 | 連勝 | BO5 | 發球 | 破發 | 體能負荷 | 風格 | 場地過渡 | 後場 | 傷病
+改進亮點：Power Devig | 動態H2H | 指數衰退Form | 近期加權ELO | 概率校正
+資料來源：Jeff Sackmann ATP/WTA CSVs (雙年) + The Odds API
 """
 
 import csv
@@ -48,6 +49,15 @@ MIN_EDGE_ML   = 0.06
 MIN_CONF_ML   = 0.60
 MIN_BOOKS     = 3
 MAX_PICKS     = 6
+
+# v4.0 model improvements
+PROB_CALIB_ALPHA  = 0.88   # regress extreme probs toward 0.5 (over-confidence correction)
+FORM_DECAY_LAMBDA = 0.12   # exponential form decay per match position
+ELO_RECENT_MULT   = {      # K-factor recency multiplier by days ago
+    180: 1.00,  # last 6 months: full weight
+    540: 0.70,  # 6–18 months
+}
+ELO_RECENCY_FLOOR = 0.45   # older than 18 months
 
 # ─────────────────────────────────────────────────────────────────────────────
 # ADVANCED MODEL CONSTANTS  (v3)
@@ -862,6 +872,8 @@ _RECENT_STATS:      Dict[str, dict]  = {}
 _INJURIES:          Dict[str, str]   = {}
 _SACKMANN_PROFILES: Dict[str, dict]  = {}
 _ODDS_PREV:         Dict[str, dict]  = {}  # previous run odds for movement detection
+_DYNAMIC_H2H:         Dict[Tuple[str, str, str], Tuple[int, int]] = {}  # (p1,p2,surf)→(w1,w2)
+_DYNAMIC_H2H_OVERALL: Dict[Tuple[str, str],       Tuple[int, int]] = {}  # (p1,p2)→(w1,w2)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # MARKOV CHAIN TENNIS MODEL
@@ -975,7 +987,17 @@ def elo_win_prob(elo1: float, elo2: float) -> float:
 
 
 def h2h_adj(p1: str, p2: str, surface: str = "") -> float:
-    # Try surface-specific H2H first (min 3 matches)
+    # 1. Dynamic H2H surface-specific (from Sackmann data, last 5 years)
+    if surface and _DYNAMIC_H2H:
+        cp1, cp2 = (p1, p2) if p1 <= p2 else (p2, p1)
+        flipped  = (cp1 != p1)
+        sw1, sw2 = _DYNAMIC_H2H.get((cp1, cp2, surface), (0, 0))
+        if flipped:
+            sw1, sw2 = sw2, sw1
+        if sw1 + sw2 >= 3:
+            return max(-0.05, min(0.05, (sw1 / (sw1 + sw2) - 0.5) * 0.10))
+
+    # 2. Static H2H surface-specific
     if surface:
         if (p1, p2, surface) in H2H_SURFACE:
             sw1, sw2 = H2H_SURFACE[(p1, p2, surface)]
@@ -985,7 +1007,18 @@ def h2h_adj(p1: str, p2: str, surface: str = "") -> float:
             sw1, sw2 = 0, 0
         if sw1 + sw2 >= 3:
             return max(-0.05, min(0.05, (sw1 / (sw1 + sw2) - 0.5) * 0.10))
-    # Fall back to overall H2H
+
+    # 3. Dynamic H2H overall
+    if _DYNAMIC_H2H_OVERALL:
+        cp1, cp2 = (p1, p2) if p1 <= p2 else (p2, p1)
+        flipped  = (cp1 != p1)
+        w1, w2   = _DYNAMIC_H2H_OVERALL.get((cp1, cp2), (0, 0))
+        if flipped:
+            w1, w2 = w2, w1
+        if w1 + w2 >= 4:
+            return max(-0.05, min(0.05, (w1 / (w1 + w2) - 0.5) * 0.10))
+
+    # 4. Static H2H overall
     w1, w2 = 0, 0
     if (p1, p2) in H2H:
         w1, w2 = H2H[(p1, p2)]
@@ -1346,10 +1379,12 @@ def public_bias_adj_fn(model_home, dv_home, model_away, dv_away):
 def compute_elo_from_sackmann(all_matches: List[dict]) -> None:
     """
     Derive surface-specific ELO from Sackmann match history and store in _LIVE_ELO.
-    Uses K=48 for Grand Slams, K=40 for Masters/Finals, K=32 otherwise.
+    v4.0: Recency-weighted K factor — recent matches carry more weight.
+    K=48/40/32 base, scaled by recency: ×1.0 (≤6mo), ×0.70 (6–18mo), ×0.45 (18mo+)
     """
     all_db = {**ATP_STATS, **WTA_STATS}
     elos: Dict[str, Dict[str, float]] = {}
+    now_utc = datetime.datetime.utcnow()
 
     for row in sorted(all_matches, key=lambda r: r.get("tourney_date", "19000101")):
         wname = (row.get("winner_name") or "").lower()
@@ -1374,13 +1409,84 @@ def compute_elo_from_sackmann(all_matches: List[dict]) -> None:
         lvl = (row.get("tourney_level") or "").upper()
         k   = 48 if lvl == "G" else 40 if lvl in ("M", "F") else 32
 
+        # Recency-weighted K: more recent matches → higher impact
+        days_ago = 730
+        td_str = row.get("tourney_date", "")
+        if len(td_str) == 8:
+            try:
+                match_dt = datetime.datetime(
+                    int(td_str[:4]), int(td_str[4:6]), int(td_str[6:8]))
+                days_ago = max(0, (now_utc - match_dt).days)
+            except ValueError:
+                pass
+        if days_ago <= 180:
+            k_mult = 1.00
+        elif days_ago <= 540:
+            k_mult = 0.70
+        else:
+            k_mult = ELO_RECENCY_FLOOR
+        k = k * k_mult
+
         elos[wkey][surf] = ew + k * (1.0 - exp_w)
         elos[lkey][surf] = el - k * (1.0 - exp_w)
 
     # Store ELO for ALL computed players (not just those in static dict)
     for key, surf_elos in elos.items():
         _LIVE_ELO[key] = {s: round(v, 1) for s, v in surf_elos.items()}
-    log.info("compute_elo_from_sackmann: %d players", len(elos))
+    log.info("compute_elo_from_sackmann: %d players (recency-weighted K)", len(elos))
+
+
+def compute_dynamic_h2h(all_matches: List[dict]) -> None:
+    """
+    v4.0: Build dynamic H2H records from Sackmann match data (last 5 years).
+    Stored in _DYNAMIC_H2H (surface-specific) and _DYNAMIC_H2H_OVERALL.
+    Used by h2h_adj() as primary source, falling back to static H2H tables.
+    """
+    global _DYNAMIC_H2H, _DYNAMIC_H2H_OVERALL
+    cutoff = datetime.datetime.utcnow() - datetime.timedelta(days=5 * 365)
+    surf_counts:    Dict[Tuple[str, str, str], List[int]] = {}
+    overall_counts: Dict[Tuple[str, str],       List[int]] = {}
+
+    for row in all_matches:
+        wname = (row.get("winner_name") or "").lower()
+        lname = (row.get("loser_name") or "").lower()
+        wkey  = norm_player(wname)
+        lkey  = norm_player(lname)
+        if not wkey or not lkey or wkey == lkey:
+            continue
+
+        td_str = row.get("tourney_date", "")
+        if len(td_str) == 8:
+            try:
+                md = datetime.datetime(int(td_str[:4]), int(td_str[4:6]), int(td_str[6:8]))
+                if md < cutoff:
+                    continue
+            except ValueError:
+                continue
+
+        surf_raw = (row.get("surface") or "hard").lower()
+        surf = surf_raw if surf_raw in ("hard", "clay", "grass") else "hard"
+
+        # Canonical order: alphabetical so (a,b) and (b,a) map to same key
+        if wkey <= lkey:
+            cp1, cp2, win_p1 = wkey, lkey, True
+        else:
+            cp1, cp2, win_p1 = lkey, wkey, False
+
+        sk = (cp1, cp2, surf)
+        if sk not in surf_counts:
+            surf_counts[sk] = [0, 0]
+        surf_counts[sk][0 if win_p1 else 1] += 1
+
+        ok = (cp1, cp2)
+        if ok not in overall_counts:
+            overall_counts[ok] = [0, 0]
+        overall_counts[ok][0 if win_p1 else 1] += 1
+
+    _DYNAMIC_H2H         = {k: (v[0], v[1]) for k, v in surf_counts.items()}
+    _DYNAMIC_H2H_OVERALL = {k: (v[0], v[1]) for k, v in overall_counts.items()}
+    log.info("compute_dynamic_h2h: %d surface pairs, %d overall pairs",
+             len(_DYNAMIC_H2H), len(_DYNAMIC_H2H_OVERALL))
 
 
 def load_odds_prev() -> Dict[str, dict]:
@@ -1874,12 +1980,14 @@ def _name_matches(csv_name: str, full_name: str) -> bool:
 
 
 def fetch_sackmann_matches(year: int = None) -> List[dict]:
-    """Download ATP + WTA match CSVs. Falls back to prev year if < 300 rows."""
+    """
+    Download ATP + WTA match CSVs for current year + previous year.
+    v4.0: Always fetches both years (no early break) for robust ELO computation.
+    """
     if year is None:
         year = datetime.datetime.utcnow().year
     rows: List[dict] = []
     for y in [year, year - 1]:
-        year_rows = 0
         for tour in ("atp", "wta"):
             url = (f"https://raw.githubusercontent.com/JeffSackmann/tennis_{tour}"
                    f"/master/{tour}_matches_{y}.csv")
@@ -1888,12 +1996,10 @@ def fetch_sackmann_matches(year: int = None) -> List[dict]:
                 r.raise_for_status()
                 batch = list(csv.DictReader(io.StringIO(r.text)))
                 rows.extend(batch)
-                year_rows += len(batch)
                 log.info("fetch_sackmann: %s_%d → %d rows", tour, y, len(batch))
             except Exception as e:
                 log.warning("fetch_sackmann %s_%d: %s", tour, y, e)
-        if y == year and year_rows >= 300:
-            break
+    log.info("fetch_sackmann total: %d rows across 2 years", len(rows))
     return rows
 
 
@@ -2052,7 +2158,8 @@ def build_player_profile(all_matches: List[dict], full_name: str,
         if rt_val is not None:
             surf_rt[surf_key].append(1.0 - rt_val)
 
-    weights   = [1.0 / (i + 1.0) for i in range(len(results))]
+    # v4.0: exponential decay (λ=FORM_DECAY_LAMBDA) — recent matches weighted higher
+    weights   = [math.exp(-FORM_DECAY_LAMBDA * i) for i in range(len(results))]
     total_w   = sum(weights)
     form_rate = sum(r * w for r, w in zip(results, weights)) / total_w if total_w > 0 else 0.5
 
@@ -2164,6 +2271,9 @@ def load_sackmann_data(all_matches: Optional[List[dict]] = None) -> None:
     # Compute live surface ELO from match history (replaces static fetch_ta_elo)
     compute_elo_from_sackmann(all_matches)
 
+    # v4.0: Build dynamic H2H records from the same match history
+    compute_dynamic_h2h(all_matches)
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PREDICTION ENGINE  (v3.2 — 15-factor model)
@@ -2253,23 +2363,29 @@ def predict(p1_key: str, p2_key: str, surface: str,
 
     wind_val, wind_kmh = wind_adj(tournament, surface, p1_key, p2_key)
 
-    blend = max(0.05, min(0.95,
+    blend_raw = (
         raw_prob + fat_adj_val + form_adj_val + h2h_val + clutch_val
         + df_val + bh_val + streak_val + wind_val
         + bo5_val + fs_val + bp_atk_val + cond_val
         + style_val + surf_trans_val + ret_depth_val + inj_val
-    ))
+    )
+
+    # v4.0: Probability calibration — regress extreme predictions toward 0.5
+    # Corrects systematic over-confidence in the ensemble model
+    blend_cal = 0.5 + (blend_raw - 0.5) * PROB_CALIB_ALPHA
+    blend = max(0.05, min(0.95, blend_cal))
 
     exp_g = expected_total_games(p1_sv, p2_sv, best_of=best_of)
 
     log.info(
         "predict %s vs %s [%s%s] ELO=%.3f MC=%.3f HB=%.3f ADV=%.3f raw=%.3f "
         "fat=%+.3f frm=%+.3f h2h=%+.3f clch=%+.3f df=%+.3f bh=%+.3f "
-        "streak=%+.3f wind=%+.3f alt=%.3f bo5=%+.3f fs=%+.3f bp=%+.3f cond=%+.3f -> %.3f",
+        "streak=%+.3f wind=%+.3f alt=%.3f bo5=%+.3f fs=%+.3f bp=%+.3f cond=%+.3f raw=%.3f calib=%.3f",
         p1_key, p2_key, surface, " indoor" if cs_adj > 0.01 else "",
         elo_p1, markov_p1, hb_p1, adv_p1, raw_prob,
         fat_adj_val, form_adj_val, h2h_val, clutch_val, df_val, bh_val,
-        streak_val, wind_val, alt_adj, bo5_val, fs_val, bp_atk_val, cond_val, blend,
+        streak_val, wind_val, alt_adj, bo5_val, fs_val, bp_atk_val, cond_val,
+        blend_raw, blend,
     )
 
     return {
@@ -2393,8 +2509,30 @@ def fetch_odds() -> List[dict]:
 
 
 def devigge(p1_raw: float, p2_raw: float) -> float:
-    total = p1_raw + p2_raw
-    return p1_raw / total if total > 1e-6 else 0.5
+    """
+    v4.0: Power-method devig (multiplicative) — more accurate than additive for
+    asymmetric tennis markets.  Finds exponent k s.t. p1^(1/k)+p2^(1/k)=1.
+    Falls back to additive when margin is near-zero.
+    """
+    if p1_raw < 1e-6 or p2_raw < 1e-6:
+        total = p1_raw + p2_raw
+        return p1_raw / total if total > 1e-9 else 0.5
+    margin = p1_raw + p2_raw - 1.0
+    if margin < 0.005:   # near-zero overround: additive ≈ power
+        return p1_raw / (p1_raw + p2_raw)
+    # Binary search for power k such that p1^(1/k) + p2^(1/k) == 1
+    lo, hi = 0.3, 10.0
+    for _ in range(50):
+        mid = (lo + hi) / 2
+        if p1_raw ** (1.0 / mid) + p2_raw ** (1.0 / mid) > 1.0:
+            lo = mid
+        else:
+            hi = mid
+    k   = (lo + hi) / 2
+    dp1 = p1_raw ** (1.0 / k)
+    dp2 = p2_raw ** (1.0 / k)
+    total = dp1 + dp2
+    return dp1 / total if total > 1e-9 else 0.5
 
 
 def parse_odds(raw: List[dict]) -> Dict[str, dict]:
@@ -2888,7 +3026,7 @@ def write_json(picks: List[dict], stats: dict, history: dict,
         "generated_at":     now.strftime("%Y-%m-%d %H:%M") + " (台灣時間)",
         "generated_at_iso": now.strftime("%Y-%m-%dT%H:%M:%S+08:00"),
         "date":             now.strftime("%Y-%m-%d"),
-        "model_version": "v3.2 — 15-factor: ELO(live)+BO5+SurfaceH2H+1stSrv+BPconv+Cond+KellyTier",
+        "model_version": "v4.0 — PowerDevig+DynH2H+ExpForm+RecencyELO+ProbCalib+15factor",
         "stats":         stats,
         "picks":         picks,
         "recent_history": list(reversed(history.get("bets", [])[-10:])),
