@@ -1981,25 +1981,31 @@ def _name_matches(csv_name: str, full_name: str) -> bool:
 
 def fetch_sackmann_matches(year: int = None) -> List[dict]:
     """
-    Download ATP + WTA match CSVs for current year + previous year.
-    v4.0: Always fetches both years (no early break) for robust ELO computation.
+    Download ATP + WTA match CSVs for current + previous 2 years.
+    Tries 'main' branch first (Sackmann renamed master→main), falls back to 'master'.
     """
     if year is None:
         year = datetime.datetime.utcnow().year
     rows: List[dict] = []
-    for y in [year, year - 1]:
+    for y in [year, year - 1, year - 2]:
         for tour in ("atp", "wta"):
-            url = (f"https://raw.githubusercontent.com/JeffSackmann/tennis_{tour}"
-                   f"/master/{tour}_matches_{y}.csv")
-            try:
-                r = requests.get(url, timeout=25)
-                r.raise_for_status()
-                batch = list(csv.DictReader(io.StringIO(r.text)))
-                rows.extend(batch)
-                log.info("fetch_sackmann: %s_%d → %d rows", tour, y, len(batch))
-            except Exception as e:
-                log.warning("fetch_sackmann %s_%d: %s", tour, y, e)
-    log.info("fetch_sackmann total: %d rows across 2 years", len(rows))
+            fetched = False
+            for branch in ("main", "master"):
+                url = (f"https://raw.githubusercontent.com/JeffSackmann/tennis_{tour}"
+                       f"/{branch}/{tour}_matches_{y}.csv")
+                try:
+                    r = requests.get(url, timeout=25)
+                    r.raise_for_status()
+                    batch = list(csv.DictReader(io.StringIO(r.text)))
+                    rows.extend(batch)
+                    log.info("fetch_sackmann: %s_%d (%s) → %d rows", tour, y, branch, len(batch))
+                    fetched = True
+                    break
+                except Exception as e:
+                    log.debug("fetch_sackmann %s_%d branch=%s: %s", tour, y, branch, e)
+            if not fetched:
+                log.warning("fetch_sackmann %s_%d: not found on main or master", tour, y)
+    log.info("fetch_sackmann total: %d rows across 3 years", len(rows))
     return rows
 
 
@@ -2585,10 +2591,17 @@ def parse_odds(raw: List[dict]) -> Dict[str, dict]:
 
 def fetch_ta_elo() -> None:
     try:
-        r = requests.get(
-            "https://raw.githubusercontent.com/JeffSackmann/tennis_atp/master/atp_players.csv",
-            timeout=20)
-        r.raise_for_status()
+        r = None
+        for _branch in ("main", "master"):
+            _url = (f"https://raw.githubusercontent.com/JeffSackmann/tennis_atp"
+                    f"/{_branch}/atp_players.csv")
+            _r = requests.get(_url, timeout=20)
+            if _r.status_code == 200:
+                r = _r
+                break
+        if r is None:
+            log.warning("fetch_ta_elo: atp_players.csv not found on main or master")
+            return
         reader  = csv.DictReader(io.StringIO(r.text))
         updated = 0
         for row in reader:
