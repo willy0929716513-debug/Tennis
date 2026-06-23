@@ -53,20 +53,6 @@ jobs:
           git diff --cached --quiet || git commit -m "chore: update tennis picks [skip ci]"
           git push origin HEAD:main
 
-      - name: Sync picks to main (GitHub Pages)
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          [ -f docs/picks_latest.json ] || exit 0
-          SHA=$(gh api repos/$GITHUB_REPOSITORY/contents/docs/picks_latest.json?ref=main --jq .sha 2>/dev/null || echo "")
-          [ -z "$SHA" ] && exit 0
-          gh api repos/$GITHUB_REPOSITORY/contents/docs/picks_latest.json \
-            --method PUT \
-            -f message="chore: update tennis picks [skip ci]" \
-            -f "content=$(base64 -w 0 docs/picks_latest.json)" \
-            -f sha="$SHA" \
-            -f branch="main" || echo "Warning: could not sync picks to main"
-
   # 每週一 UTC 03:00 自動執行回測，或手動觸發時選擇
   backtest:
     runs-on: ubuntu-latest
