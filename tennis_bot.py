@@ -2276,7 +2276,7 @@ def load_sackmann_data(all_matches: Optional[List[dict]] = None) -> None:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# PREDICTION ENGINE  (v3.2 — 15-factor model)
+# PREDICTION ENGINE  (v4.0 — 15-factor + Power-Devig + Calibration)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def predict(p1_key: str, p2_key: str, surface: str,
@@ -2284,8 +2284,9 @@ def predict(p1_key: str, p2_key: str, surface: str,
             sport_key: str = "", tournament: str = "") -> dict:
     """
     Base: 25% Surface ELO + 25% Markov + 20% H/B + 30% Advanced (DF-adjusted H/B)
-    Adj:  fatigue(age-weighted) | surface-form | H2H | clutch | DF | lefty | backhand
-          altitude | wind | win-streak
+    Adj:  fatigue(age-weighted) | surface-form | H2H(dynamic) | clutch(BO5-boosted)
+          DF | lefty | backhand | altitude | wind | win-streak | BO5 specialist
+    Post: probability calibration (α=0.88); WTA extra dampening (α×0.96)
     """
     surf_adj = SURFACE_PT_ADJ.get(surface, 0.0)
     is_wta   = "wta" in sport_key.lower() or "wta" in tour_level.lower()
@@ -2363,16 +2364,21 @@ def predict(p1_key: str, p2_key: str, surface: str,
 
     wind_val, wind_kmh = wind_adj(tournament, surface, p1_key, p2_key)
 
+    # v4.0: In BO5 (Grand Slams) mental/clutch game matters significantly more
+    effective_clutch = clutch_val * (1.40 if best_of == 5 else 1.0)
+    effective_clutch = max(-0.10, min(0.10, effective_clutch))
+
     blend_raw = (
-        raw_prob + fat_adj_val + form_adj_val + h2h_val + clutch_val
+        raw_prob + fat_adj_val + form_adj_val + h2h_val + effective_clutch
         + df_val + bh_val + streak_val + wind_val
         + bo5_val + fs_val + bp_atk_val + cond_val
         + style_val + surf_trans_val + ret_depth_val + inj_val
     )
 
     # v4.0: Probability calibration — regress extreme predictions toward 0.5
-    # Corrects systematic over-confidence in the ensemble model
-    blend_cal = 0.5 + (blend_raw - 0.5) * PROB_CALIB_ALPHA
+    # WTA gets extra dampening (α×0.96) due to higher match volatility
+    calib_alpha = PROB_CALIB_ALPHA * (0.96 if is_wta else 1.0)
+    blend_cal   = 0.5 + (blend_raw - 0.5) * calib_alpha
     blend = max(0.05, min(0.95, blend_cal))
 
     exp_g = expected_total_games(p1_sv, p2_sv, best_of=best_of)
@@ -2380,10 +2386,10 @@ def predict(p1_key: str, p2_key: str, surface: str,
     log.info(
         "predict %s vs %s [%s%s] ELO=%.3f MC=%.3f HB=%.3f ADV=%.3f raw=%.3f "
         "fat=%+.3f frm=%+.3f h2h=%+.3f clch=%+.3f df=%+.3f bh=%+.3f "
-        "streak=%+.3f wind=%+.3f alt=%.3f bo5=%+.3f fs=%+.3f bp=%+.3f cond=%+.3f raw=%.3f calib=%.3f",
+        "streak=%+.3f wind=%+.3f alt=%.3f bo5=%+.3f fs=%+.3f bp=%+.3f cond=%+.3f uncalib=%.3f -> %.3f",
         p1_key, p2_key, surface, " indoor" if cs_adj > 0.01 else "",
         elo_p1, markov_p1, hb_p1, adv_p1, raw_prob,
-        fat_adj_val, form_adj_val, h2h_val, clutch_val, df_val, bh_val,
+        fat_adj_val, form_adj_val, h2h_val, effective_clutch, df_val, bh_val,
         streak_val, wind_val, alt_adj, bo5_val, fs_val, bp_atk_val, cond_val,
         blend_raw, blend,
     )
@@ -2397,7 +2403,7 @@ def predict(p1_key: str, p2_key: str, surface: str,
         "h2h_adj":         round(h2h_val, 4),
         "fat_adj":         round(fat_adj_val, 4),
         "form_adj":        round(form_adj_val, 4),
-        "clutch_adj":      round(clutch_val, 4),
+        "clutch_adj":      round(effective_clutch, 4),
         "df_adj":          round(df_val, 4),
         "lefty_adj":       round(lefty_sv, 4),
         "backhand_adj":    round(bh_val, 4),
