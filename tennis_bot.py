@@ -3303,8 +3303,16 @@ def send_discord(picks: List[dict], stats: dict, is_recording: bool = False) -> 
             p1d = p.get("p1_cn") or p["p1"]
             p2d = p.get("p2_cn") or p["p2"]
             bnd = p.get("bet_on_cn") or p["bet_on"]
-            lines.append("%s %s [%s] %s vs %s" % (
-                p["star"], p["surface_emoji"], p.get("tour_type", "ATP"), p1d, p2d))
+            commence_str = ""
+            if p.get("commence"):
+                try:
+                    ct = datetime.datetime.fromisoformat(p["commence"].replace("Z", "+00:00"))
+                    ct_tw = ct.astimezone(datetime.timezone(datetime.timedelta(hours=8)))
+                    commence_str = "  🕐 %s (台灣時間)" % ct_tw.strftime("%m/%d %H:%M")
+                except Exception:
+                    pass
+            lines.append("%s %s [%s] %s vs %s%s" % (
+                p["star"], p["surface_emoji"], p.get("tour_type", "ATP"), p1d, p2d, commence_str))
             lines.append("  推薦: %s @%.2f  模型:%.1f%%  edge:+%.1f%%  $%.0f" % (
                 bnd, p["best_price"], p["model_p"], p["edge"], p["stake"]))
             adj_parts = []
