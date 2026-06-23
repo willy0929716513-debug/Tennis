@@ -2002,7 +2002,7 @@ def fetch_sackmann_matches(year: int = None) -> List[dict]:
                     fetched = True
                     break
                 except Exception as e:
-                    log.debug("fetch_sackmann %s_%d branch=%s: %s", tour, y, branch, e)
+                    log.warning("fetch_sackmann %s_%d branch=%s: %s", tour, y, branch, e)
             if not fetched:
                 log.warning("fetch_sackmann %s_%d: not found on main or master", tour, y)
     log.info("fetch_sackmann total: %d rows across 3 years", len(rows))
@@ -2589,43 +2589,61 @@ def parse_odds(raw: List[dict]) -> Dict[str, dict]:
 # LIVE ELO FROM TENNIS ABSTRACT
 # ─────────────────────────────────────────────────────────────────────────────
 
-def fetch_ta_elo() -> None:
-    try:
-        r = None
-        for _branch in ("main", "master"):
-            _url = (f"https://raw.githubusercontent.com/JeffSackmann/tennis_atp"
-                    f"/{_branch}/atp_players.csv")
-            _r = requests.get(_url, timeout=20)
-            if _r.status_code == 200:
-                r = _r
-                break
-        if r is None:
-            log.warning("fetch_ta_elo: atp_players.csv not found on main or master")
-            return
-        reader  = csv.DictReader(io.StringIO(r.text))
-        updated = 0
-        for row in reader:
-            name = ("%s %s" % (row.get("name_first", ""),
-                               row.get("name_last", ""))).strip().lower()
-            key  = norm_player(name)
-            if key not in ATP_STATS:
-                continue
-            elo_str = row.get("elo") or row.get("elo_rating") or ""
-            if not elo_str:
-                continue
-            try:
-                elo = float(elo_str)
+def _parse_ta_elo_page(html: str) -> int:
+    """Parse Tennis Abstract ELO HTML page, populate _LIVE_ELO. Returns count of players added."""
+    import re as _re
+    updated = 0
+    # Match table rows: name link + 4 ELO columns (overall, hard, clay, grass)
+    row_pat = _re.compile(
+        r'<a[^>]+>([^<]{3,40})</a>'          # player name
+        r'(?:.*?<td[^>]*>(\d{3,4})</td>){4}',  # 4 ELO numbers
+        _re.DOTALL,
+    )
+    # Simpler pattern: find all anchor text + following td numbers
+    cell_pat = _re.compile(r'<td[^>]*>(\d{3,4})</td>')
+    name_pat  = _re.compile(r'<a[^>]+>([A-Z][a-z]+(?:[\s\-][A-Za-z]+){1,3})</a>')
+
+    # Find all player rows by scanning for name links followed by numeric cells
+    pos = 0
+    while pos < len(html):
+        nm = name_pat.search(html, pos)
+        if nm is None:
+            break
+        name_end = nm.end()
+        # Look for 4 ELO numbers in the next 300 chars
+        chunk = html[name_end: name_end + 300]
+        nums = cell_pat.findall(chunk)
+        if len(nums) >= 4:
+            elo_vals = [int(x) for x in nums[:4]]
+            overall, hard_elo, clay_elo, grass_elo = elo_vals
+            player_name = nm.group(1).strip()
+            key = norm_player(player_name)
+            if key and 1400 <= overall <= 3000:
                 _LIVE_ELO[key] = {
-                    "hard":  elo,
-                    "clay":  elo - 30,
-                    "grass": elo + 10,
+                    "hard":  float(hard_elo),
+                    "clay":  float(clay_elo),
+                    "grass": float(grass_elo),
                 }
                 updated += 1
-            except ValueError:
-                pass
-        log.info("fetch_ta_elo: updated %d players", updated)
-    except Exception as e:
-        log.warning("fetch_ta_elo: %s — using baseline ELO", e)
+        pos = name_end
+    return updated
+
+
+def fetch_ta_elo() -> None:
+    """Fetch current surface ELO for all ATP + WTA players from Tennis Abstract."""
+    total = 0
+    for tour_slug in ("atp_elo_ratings", "wta_elo_ratings"):
+        url = f"https://tennisabstract.com/reports/{tour_slug}.html"
+        try:
+            r = requests.get(url, timeout=30,
+                             headers={"User-Agent": "Mozilla/5.0 TennisBotResearch/1.0"})
+            r.raise_for_status()
+            n = _parse_ta_elo_page(r.text)
+            log.info("fetch_ta_elo: %s → %d players", tour_slug, n)
+            total += n
+        except Exception as e:
+            log.warning("fetch_ta_elo %s: %s", tour_slug, e)
+    log.info("fetch_ta_elo total: %d players updated in _LIVE_ELO", total)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -3063,11 +3081,16 @@ def write_json(picks: List[dict], stats: dict, history: dict,
 
 def run() -> None:
     now_tw = datetime.datetime.utcnow() + datetime.timedelta(hours=8)
-    log.info("=== Tennis Bot v3.2 start %s ===", now_tw.strftime("%Y-%m-%d %H:%M"))
+    log.info("=== Tennis Bot v4.0 start %s ===", now_tw.strftime("%Y-%m-%d %H:%M"))
 
     all_matches_raw = fetch_sackmann_matches()
 
     load_sackmann_data(all_matches_raw)
+
+    # If Sackmann data unavailable, fall back to Tennis Abstract live ELO
+    if not all_matches_raw:
+        log.info("Sackmann data unavailable — fetching Tennis Abstract live ELO as fallback")
+        fetch_ta_elo()
 
     auto_inj = detect_injuries(all_matches_raw) if all_matches_raw else set()
     _INJURIES.update(auto_inj)
