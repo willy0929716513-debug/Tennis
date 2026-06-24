@@ -757,7 +757,7 @@ function avatarUrl(name,isBet){
   const bg=isBet?'#051428':'#0a0f1a';
   const color=isBet?'#00E5FF':'#4a5a7a';
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72"><circle cx="36" cy="36" r="36" fill="${bg}"/><text x="36" y="46" text-anchor="middle" font-family="Arial,sans-serif" font-size="26" font-weight="bold" fill="${color}">${inits}</text></svg>`;
-  return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg);
+  return 'data:image/svg+xml;base64,'+btoa(svg);
 }
 
 const TOURN_CN={
