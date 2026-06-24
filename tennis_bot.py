@@ -2401,18 +2401,26 @@ def norm_player(name: str, tour: str = "") -> str:
     return n.replace(" ", "_").replace("-", "_")
 
 
-def get_surface_stats(key: str, surface: str) -> dict:
+def get_surface_stats(key: str, surface: str, tour: str = "") -> dict:
     players = {**ATP_STATS, **WTA_STATS}
     surf = surface if surface in ("hard", "clay", "grass") else "hard"
     has_static = key in players
 
     # If not in static database, check live rankings for rank-based stats
     if not has_static and key in _LIVE_RANKS:
-        rank, tour = _LIVE_RANKS[key]
-        base = _rank_based_stats(rank, surf, tour)
+        rank, live_tour = _LIVE_RANKS[key]
+        base = _rank_based_stats(rank, surf, live_tour)
     else:
-        base = dict(players.get(key, {}).get(surf,
-               {"svpt_won": 0.610, "rtpt_won": 0.330, "elo": 1500}))
+        if not has_static:
+            # Use tour-appropriate defaults: WTA players serve and return very differently from ATP
+            is_wta_player = (tour == "wta") or (key in WTA_STATS)
+            if is_wta_player:
+                default = {"svpt_won": 0.545, "rtpt_won": 0.375, "elo": 1500}
+            else:
+                default = {"svpt_won": 0.610, "rtpt_won": 0.330, "elo": 1500}
+        else:
+            default = {"svpt_won": 0.610, "rtpt_won": 0.330, "elo": 1500}
+        base = dict(players.get(key, {}).get(surf, default))
 
     live_elo = _LIVE_ELO.get(key, {}).get(surf)
     if live_elo:
@@ -2570,18 +2578,25 @@ def fetch_current_rankings() -> None:
         if local_base:
             fp = os.path.join(local_base, filename)
             if os.path.isfile(fp):
-                with open(fp, "r", encoding="utf-8") as f:
-                    return f.read()
+                sz = os.path.getsize(fp)
+                if sz > 100:
+                    with open(fp, "r", encoding="utf-8") as f:
+                        return f.read()
+                else:
+                    log.warning("_read_csv: %s is only %d bytes (truncated/empty), trying HTTP", filename, sz)
         tour_name = filename.split("_")[0]
         for branch in ("master", "main"):
             url = (f"https://raw.githubusercontent.com/JeffSackmann/tennis_{tour_name}"
                    f"/{branch}/{filename}")
             try:
-                rp = requests.get(url, timeout=20, headers=http_headers)
+                rp = requests.get(url, timeout=30, headers=http_headers)
                 if rp.status_code == 200:
+                    log.info("_read_csv: fetched %s via HTTP (%d bytes)", filename, len(rp.content))
                     return rp.text
-            except Exception:
-                pass
+                else:
+                    log.warning("_read_csv: HTTP %d for %s", rp.status_code, url)
+            except Exception as exc:
+                log.warning("_read_csv: request error for %s: %s", filename, exc)
         return None
 
     for tour in ("atp", "wta"):
@@ -2963,9 +2978,10 @@ def predict(p1_key: str, p2_key: str, surface: str,
     """
     surf_adj = SURFACE_PT_ADJ.get(surface, 0.0)
     is_wta   = "wta" in sport_key.lower() or "wta" in tour_level.lower()
+    tour_str = "wta" if is_wta else "atp"
 
-    s1 = get_surface_stats(p1_key, surface)
-    s2 = get_surface_stats(p2_key, surface)
+    s1 = get_surface_stats(p1_key, surface, tour=tour_str)
+    s2 = get_surface_stats(p2_key, surface, tour=tour_str)
 
     prof1 = _SACKMANN_PROFILES.get(p1_key, {})
     prof2 = _SACKMANN_PROFILES.get(p2_key, {})

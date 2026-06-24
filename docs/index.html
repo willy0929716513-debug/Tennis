@@ -42,10 +42,36 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 40px;display:fl
 .nav-logo{font-size:1rem;font-weight:800;letter-spacing:3px;color:var(--cyan);text-transform:uppercase}
 .nav-logo span{color:var(--gold)}
 .nav-clock{font-family:'SF Mono',monospace;font-size:.78rem;color:var(--muted);letter-spacing:1px}
-.nav-right{display:flex;align-items:center;gap:16px}
+.nav-right{display:flex;align-items:center;gap:14px}
 .live-badge{display:flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;letter-spacing:2px;color:var(--red);text-transform:uppercase}
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 1.2s ease infinite}
 @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.6}}
+.trigger-btn{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:100px;border:1px solid rgba(0,229,255,.35);background:rgba(0,229,255,.08);color:var(--cyan);font-size:.72rem;font-weight:700;letter-spacing:1px;cursor:pointer;transition:.2s;text-transform:uppercase}
+.trigger-btn:hover{background:rgba(0,229,255,.16);border-color:var(--cyan);box-shadow:var(--glow-cyan)}
+.trigger-btn.running{border-color:var(--gold);color:var(--gold);background:rgba(255,215,0,.08);animation:triggerpulse 1s ease infinite}
+.trigger-btn.success{border-color:var(--green);color:var(--green);background:rgba(0,255,136,.08)}
+.trigger-btn.error{border-color:var(--red);color:var(--red);background:rgba(255,51,102,.08)}
+@keyframes triggerpulse{0%,100%{opacity:1}50%{opacity:.5}}
+.trigger-icon{font-size:.9rem;line-height:1}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-card{background:#0d1226;border:1px solid rgba(0,229,255,.2);border-radius:20px;padding:32px;max-width:460px;width:90%;box-shadow:0 0 60px rgba(0,229,255,.1)}
+.modal-title{font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:6px}
+.modal-sub{font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:24px}
+.modal-label{font-size:.7rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.modal-input{width:100%;padding:12px 16px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.85rem;font-family:monospace;outline:none;transition:.2s;margin-bottom:6px}
+.modal-input:focus{border-color:var(--cyan);background:rgba(0,229,255,.04)}
+.modal-hint{font-size:.67rem;color:var(--muted);margin-bottom:20px;line-height:1.5}
+.modal-hint a{color:var(--cyan);text-decoration:none}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end}
+.modal-cancel{padding:10px 20px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.78rem;cursor:pointer;transition:.15s}
+.modal-cancel:hover{border-color:var(--text);color:var(--text)}
+.modal-save{padding:10px 24px;border-radius:100px;border:none;background:linear-gradient(135deg,var(--cyan),var(--green));color:#050816;font-size:.78rem;font-weight:700;cursor:pointer;transition:.15s}
+.modal-save:hover{opacity:.85}
+.modal-clear-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:10px 14px;background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.1);border-radius:10px;font-size:.75rem;color:var(--muted)}
+.modal-clear-btn{font-size:.7rem;color:var(--red);cursor:pointer;text-decoration:underline;background:none;border:none;cursor:pointer}
 
 /* ── HERO ── */
 #hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 80px;overflow:hidden}
@@ -92,14 +118,19 @@ section{position:relative;z-index:10;padding:80px 40px}
 .no-picks{text-align:center;padding:80px 24px;color:var(--muted)}
 .no-picks-icon{font-size:3rem;margin-bottom:16px}
 .no-picks h3{font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:8px}
-.picks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px}
-.pick-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;backdrop-filter:blur(20px);transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden}
-.pick-card:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,229,255,.1)}
+.picks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:24px}
+
+/* ── PICK CARD (Redesigned) ── */
+.pick-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);backdrop-filter:blur(20px);transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+.pick-card:hover{transform:translateY(-4px);box-shadow:0 24px 60px rgba(0,229,255,.1)}
 .pick-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--green))}
 .pick-card.tier-A::before{background:linear-gradient(90deg,var(--gold),var(--red))}
 .pick-card.tier-B::before{background:linear-gradient(90deg,var(--cyan),var(--green))}
 .pick-card.tier-C::before{background:linear-gradient(90deg,var(--muted),var(--text))}
-.pick-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+
+/* pick card header */
+.pc-header{display:flex;align-items:flex-start;justify-content:space-between;padding:18px 20px 0}
+.pc-header-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .tier-badge{font-size:.6rem;font-weight:800;letter-spacing:2px;padding:4px 10px;border-radius:20px;text-transform:uppercase}
 .tier-badge.A{background:rgba(255,215,0,.15);color:var(--gold);border:1px solid rgba(255,215,0,.3)}
 .tier-badge.B{background:rgba(0,229,255,.12);color:var(--cyan);border:1px solid rgba(0,229,255,.25)}
@@ -109,27 +140,57 @@ section{position:relative;z-index:10;padding:80px 40px}
 .surf-clay{background:rgba(255,107,53,.1);color:#FF6B35}
 .surf-hard{background:rgba(0,229,255,.1);color:var(--cyan)}
 .surf-carpet{background:rgba(255,215,0,.1);color:var(--gold)}
-.players-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-.player-box{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1}
-.player-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;letter-spacing:-1px;color:#fff}
-.pa-bet{background:linear-gradient(135deg,var(--cyan),var(--green));box-shadow:0 0 20px rgba(0,229,255,.3)}
-.pa-other{background:rgba(255,255,255,.08);color:var(--muted)}
-.player-name{font-size:.78rem;font-weight:600;text-align:center;max-width:100px;line-height:1.2}
-.player-rank{font-size:.62rem;color:var(--muted)}
-.vs-box{display:flex;flex-direction:column;align-items:center;gap:4px;padding:0 8px}
-.vs-text{font-size:.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
-.pick-metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
-.pm-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:3px}
-.pm-label{font-size:.6rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
-.pm-val{font-size:1rem;font-weight:700}
+.pc-header-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.pc-time{font-size:.72rem;font-weight:700;color:var(--text);font-family:'SF Mono',monospace;letter-spacing:.5px}
+.pc-countdown{font-size:.63rem;color:var(--cyan);font-family:'SF Mono',monospace;letter-spacing:.5px}
+.pc-countdown.started{color:var(--red)}
+
+/* tournament row */
+.pc-tournament{padding:8px 20px 0;font-size:.68rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+
+/* players section */
+.pc-players{display:flex;align-items:stretch;gap:0;padding:16px 20px;position:relative}
+.pc-player{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:0 8px}
+.pc-player.bet-side .pc-pname{color:var(--cyan)}
+.pc-photo{width:68px;height:68px;border-radius:50%;object-fit:cover;display:block;flex-shrink:0}
+.pc-photo.bet-photo{box-shadow:0 0 0 2px var(--cyan),var(--glow-cyan)}
+.pc-photo.opp-photo{opacity:.7;filter:grayscale(30%)}
+.pc-pname{font-size:.82rem;font-weight:700;text-align:center;line-height:1.25;max-width:120px}
+.pc-pcn{font-size:.68rem;color:var(--muted);text-align:center}
+.pc-pstats{display:flex;gap:8px;margin-top:2px}
+.pc-stat{font-size:.63rem;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:1px}
+.pc-stat-val{font-size:.72rem;font-weight:700;color:var(--text);font-family:'SF Mono',monospace}
+.pc-stat-val.elo-hi{color:var(--cyan)}
+.pc-vs-col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:0 4px;flex-shrink:0;min-width:44px}
+.pc-vs{font-size:.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.pc-bet-arrow{font-size:.65rem;color:var(--cyan);text-align:center;line-height:1.3;font-weight:700}
+
+/* probability comparison */
+.pc-probs{padding:0 20px 14px}
+.pc-prob-row{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.pc-prob-label{font-size:.6rem;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;min-width:40px}
+.pc-prob-bar{flex:1;height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;position:relative}
+.pc-prob-fill{height:100%;border-radius:3px;transition:width 1.2s ease}
+.fill-model{background:linear-gradient(90deg,var(--cyan),var(--green))}
+.fill-market{background:rgba(255,215,0,.5)}
+.pc-prob-val{font-size:.72rem;font-weight:700;min-width:38px;text-align:right;font-family:'SF Mono',monospace}
+.pc-edge-tag{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:4px 12px;border-radius:100px;background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.2);font-size:.68rem;font-weight:700;color:var(--green)}
+.pc-edge-tag.edge-hi{background:rgba(255,215,0,.08);border-color:rgba(255,215,0,.3);color:var(--gold)}
+
+/* metrics grid */
+.pc-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 20px 14px}
+.pm-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:9px 12px;display:flex;flex-direction:column;gap:2px}
+.pm-label{font-size:.58rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.pm-val{font-size:.95rem;font-weight:700}
 .pm-val.cyan{color:var(--cyan)}
 .pm-val.green{color:var(--green)}
 .pm-val.gold{color:var(--gold)}
-.prob-row{display:flex;align-items:center;gap:12px;font-size:.7rem;color:var(--muted);margin-bottom:4px}
-.prob-bar-wrap{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
-.prob-fill{height:100%;border-radius:3px;transition:width 1s ease}
-.prob-fill.p1{background:linear-gradient(90deg,var(--cyan),var(--green))}
-.prob-fill.p2{background:rgba(255,255,255,.15)}
+
+/* bet highlight footer */
+.pc-bet-footer{margin:0 20px 18px;padding:10px 14px;border-radius:10px;background:linear-gradient(135deg,rgba(0,229,255,.08),rgba(0,255,136,.06));border:1px solid rgba(0,229,255,.15);display:flex;align-items:center;gap:10px}
+.pc-bet-label{font-size:.6rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;white-space:nowrap}
+.pc-bet-name{font-size:.82rem;font-weight:700;color:var(--cyan)}
+.pc-bet-odds{margin-left:auto;font-size:.88rem;font-weight:900;color:var(--gold)}
 
 /* ── INTEL GRID ── */
 #intel-section{border-top:1px solid var(--border)}
@@ -143,7 +204,8 @@ section{position:relative;z-index:10;padding:80px 40px}
 .ic-tour{font-size:.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
 .ic-surface{font-size:.62rem;padding:2px 8px;border-radius:20px}
 .ic-players{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.ic-avatar{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
+.ic-avatar{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;overflow:hidden}
+.ic-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}
 .ic-names{flex:1}
 .ic-p1{font-size:.85rem;font-weight:700;line-height:1.2}
 .ic-p2{font-size:.75rem;color:var(--muted)}
@@ -233,6 +295,7 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
 /* ── MOBILE ── */
 @media(max-width:900px){
   nav{padding:14px 20px}
+  .trigger-btn span.trigger-label{display:none}
   section{padding:60px 20px}
   .hero-metrics{gap:28px}
   .hm-value{font-size:1.8rem}
@@ -265,12 +328,38 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
 <!-- Particles -->
 <canvas id="particles"></canvas>
 
+<!-- PAT Modal -->
+<div class="modal-overlay" id="pat-modal">
+  <div class="modal-card">
+    <div class="modal-title">設定 GitHub PAT</div>
+    <div class="modal-sub">輸入 GitHub Personal Access Token 以從此頁面觸發網球機器人。Token 僅儲存於您的瀏覽器本機，不會傳送至任何第三方伺服器。</div>
+    <div id="pat-existing-row" class="modal-clear-row" style="display:none">
+      <span>已儲存 Token：<code id="pat-preview" style="color:var(--cyan)">—</code></span>
+      <button class="modal-clear-btn" onclick="clearPat()">清除</button>
+    </div>
+    <div class="modal-label">Personal Access Token</div>
+    <input class="modal-input" type="password" id="pat-input" placeholder="github_pat_xxxxxxxxxxxxx" autocomplete="off" spellcheck="false">
+    <div class="modal-hint">
+      需要具有 <strong style="color:var(--text)">workflow</strong> 權限的 Fine-grained PAT 或 Classic PAT（勾選 repo + workflow）。<br>
+      前往 <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings → Tokens</a> 建立。
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closePatModal()">取消</button>
+      <button class="modal-save" onclick="savePatAndTrigger()">儲存並觸發</button>
+    </div>
+  </div>
+</div>
+
 <!-- Nav -->
 <nav>
   <div class="nav-logo">Tennis<span>AI</span></div>
   <div class="nav-right">
     <div id="live-badge" class="live-badge" style="display:none"><span class="live-dot"></span>直播</div>
     <div class="nav-clock" id="nav-clock">--:--:-- TST</div>
+    <button class="trigger-btn" id="trigger-btn" onclick="onTriggerClick()">
+      <span class="trigger-icon">▶</span>
+      <span class="trigger-label">觸發更新</span>
+    </button>
   </div>
 </nav>
 
@@ -464,9 +553,9 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
 /* ── CLOCK ── */
 function updateClock(){
   const t=new Date();
-  const tw=new Date(t.getTime()+8*3600000);
   const s=h=>String(h).padStart(2,'0');
-  document.getElementById('nav-clock').textContent=s(tw.getUTCHours())+':'+s(tw.getUTCMinutes())+':'+s(tw.getUTCSeconds())+' TST';
+  const tw=new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(t);
+  document.getElementById('nav-clock').textContent=tw+' TST';
 }
 setInterval(updateClock,1000);updateClock();
 
@@ -481,10 +570,107 @@ document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
 function initials(n){return n.split(' ').map(w=>w[0]||'').slice(0,2).join('').toUpperCase()||'?'}
 function surfClass(s){const m={'grass':'surf-grass','clay':'surf-clay','hard':'surf-hard','carpet':'surf-carpet'};return m[(s||'').toLowerCase()]||'surf-hard'}
 function surfLabel(s){const m={'grass':'草地','clay':'紅土','hard':'硬地','carpet':'地毯'};return m[(s||'').toLowerCase()]||(s?s.charAt(0).toUpperCase()+s.slice(1):'硬地')}
-function resultLabel(r){return r==='win'?'贏':r==='loss'?'輸':r==='push'?'平':'?'}
+function resultLabel(r){return r==='win'||r==='W'?'贏':r==='loss'||r==='L'?'輸':r==='push'?'平':'?'}
 function tierLabel(t){return t==='A'?'精選':t==='B'?'推薦':'普通'}
 function fmtPct(v){return(+v||0).toFixed(1)+'%'}
 function fmtEdge(v){return(v>=0?'+':'')+(+v||0).toFixed(1)+'%'}
+
+function avatarUrl(name,isBet){
+  const encoded=encodeURIComponent((name||'?').trim());
+  const bg=isBet?'051428':'0a0f1a';
+  const color=isBet?'00E5FF':'4a5a7a';
+  return`https://ui-avatars.com/api/?name=${encoded}&size=72&background=${bg}&color=${color}&bold=true&rounded=true&font-size=0.38`;
+}
+
+function toTaiwanTime(utc){
+  if(!utc)return'—';
+  try{
+    return new Intl.DateTimeFormat('zh-TW',{timeZone:'Asia/Taipei',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(utc));
+  }catch(e){return'—'}
+}
+
+function getCountdown(utc){
+  if(!utc)return'';
+  const diff=new Date(utc)-Date.now();
+  if(diff<=0)return'started';
+  const h=Math.floor(diff/3600000);
+  const m=Math.floor((diff%3600000)/60000);
+  const s=Math.floor((diff%60000)/1000);
+  if(h>=48)return Math.floor(h/24)+'天後開賽';
+  if(h>=1)return h+'時'+String(m).padStart(2,'0')+'分後開賽';
+  return m+'分'+String(s).padStart(2,'0')+'秒後開賽';
+}
+
+/* update all countdown elements every second */
+setInterval(()=>{
+  document.querySelectorAll('[data-commence]').forEach(el=>{
+    const cd=getCountdown(el.dataset.commence);
+    if(cd==='started'){el.textContent='進行中';el.classList.add('started')}
+    else{el.textContent=cd;el.classList.remove('started')}
+  });
+},1000);
+
+/* ── PAT / TRIGGER ── */
+function getPat(){return localStorage.getItem('tennis_github_pat')||''}
+function clearPat(){localStorage.removeItem('tennis_github_pat');document.getElementById('pat-preview').textContent='—';document.getElementById('pat-existing-row').style.display='none';document.getElementById('pat-input').value=''}
+
+function openPatModal(){
+  const pat=getPat();
+  if(pat){
+    document.getElementById('pat-preview').textContent=pat.slice(0,8)+'…'+pat.slice(-4);
+    document.getElementById('pat-existing-row').style.display='flex';
+  } else {
+    document.getElementById('pat-existing-row').style.display='none';
+  }
+  document.getElementById('pat-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('pat-input').focus(),100);
+}
+
+function closePatModal(){document.getElementById('pat-modal').classList.remove('open')}
+
+document.getElementById('pat-modal').addEventListener('click',function(e){if(e.target===this)closePatModal()});
+
+async function triggerBot(pat){
+  const btn=document.getElementById('trigger-btn');
+  btn.className='trigger-btn running';
+  btn.innerHTML='<span class="trigger-icon">⏳</span><span class="trigger-label">執行中…</span>';
+  try{
+    const res=await fetch('https://api.github.com/repos/willy0929716513-debug/Tennis/actions/workflows/tennis_bot.yml/dispatches',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+pat,'Accept':'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28'},
+      body:JSON.stringify({ref:'main'})
+    });
+    if(res.status===204){
+      btn.className='trigger-btn success';
+      btn.innerHTML='<span class="trigger-icon">✓</span><span class="trigger-label">已觸發</span>';
+      setTimeout(()=>{btn.className='trigger-btn';btn.innerHTML='<span class="trigger-icon">▶</span><span class="trigger-label">觸發更新</span>'},4000);
+    } else {
+      const msg=res.status===401?'Token 無效':res.status===403?'權限不足':res.status===404?'找不到工作流程':'錯誤 '+res.status;
+      btn.className='trigger-btn error';
+      btn.innerHTML='<span class="trigger-icon">✗</span><span class="trigger-label">'+msg+'</span>';
+      setTimeout(()=>{btn.className='trigger-btn';btn.innerHTML='<span class="trigger-icon">▶</span><span class="trigger-label">觸發更新</span>'},5000);
+    }
+  }catch(e){
+    btn.className='trigger-btn error';
+    btn.innerHTML='<span class="trigger-icon">✗</span><span class="trigger-label">網路錯誤</span>';
+    setTimeout(()=>{btn.className='trigger-btn';btn.innerHTML='<span class="trigger-icon">▶</span><span class="trigger-label">觸發更新</span>'},5000);
+  }
+}
+
+function savePatAndTrigger(){
+  const val=document.getElementById('pat-input').value.trim();
+  if(val){localStorage.setItem('tennis_github_pat',val)}
+  const pat=val||getPat();
+  if(!pat){alert('請輸入 GitHub PAT');return}
+  closePatModal();
+  triggerBot(pat);
+}
+
+function onTriggerClick(){
+  const pat=getPat();
+  if(!pat){openPatModal();return}
+  triggerBot(pat);
+}
 
 /* ── CHART STATE ── */
 let chartInstance=null,chartData={pnl:[],wr:[],edge:[]},chartLabels=[];
@@ -569,13 +755,13 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
   roiEl.className='psr-val '+(roi>=0?'green':'red');
   document.getElementById('ps-today').textContent=picks.length;
   document.getElementById('term-update').textContent=data.generated_at||'—';
-  document.getElementById('footer-gen').textContent='生成時間：'+( data.generated_at||'—');
+  document.getElementById('footer-gen').textContent='生成時間：'+(data.generated_at||'—');
 
   // Chart from history
   if(history.length>0){
     let cumPnl=0;
     history.forEach(h=>{
-      const win=h.result==='win';
+      const win=h.result==='win'||h.result==='W';
       const stake=h.stake||1;const price=h.price||2;
       cumPnl+=win?stake*(price-1):-stake;
       chartLabels.push(h.date?h.date.slice(5):'');
@@ -593,57 +779,102 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
     {label:'投報率',val:fmtEdge(roi),up:roi>=0},
     {label:'今日選注',val:picks.length,up:true},
     {label:'已結算',val:stats.settled||0,up:true},
-    {label:'模型',val:data.model_version||'v1',up:true},
+    {label:'模型',val:data.model_version?data.model_version.split('—')[0].trim():'v1',up:true},
   ];
   const t=document.getElementById('ticker');
   const inner=tickerItems.map(i=>`<span class="ticker-item"><span class="t-name">${i.label}</span><span class="${i.up?'t-up':'t-dn'}">${i.val}</span></span>`).join('');
   t.innerHTML=inner+inner;
 
-  // Picks section
+  // ── PICKS SECTION ──
   const picksContainer=document.getElementById('picks-container');
   document.getElementById('picks-sub').textContent=`今日 ${picks.length} 注推薦 · ${data.date||'今天'}`;
   if(picks.length===0){
-    picksContainer.innerHTML=`<div class="no-picks"><div class="no-picks-icon">🔍</div><h3>今日暫無推薦選注</h3><p>模型需最低 ${(0.06*100).toFixed(0)}% 優勢門檻，所有比賽已篩選，未發現符合條件的機會。</p></div>`;
+    picksContainer.innerHTML=`<div class="no-picks"><div class="no-picks-icon">🔍</div><h3>今日暫無推薦選注</h3><p>模型需最低優勢門檻，所有比賽已篩選，未發現符合條件的機會。</p></div>`;
   } else {
     const grid=document.createElement('div');grid.className='picks-grid';
-    picks.forEach(p=>{
+    picks.forEach((p,idx)=>{
       const tier=p.tier||'C';
       const isBetHome=p.bet_on===p.p1;
-      const betAvatar=initials(p.bet_on||'');
-      const oppAvatar=initials((isBetHome?p.p2:p.p1)||'');
-      const modelP=p.model_p||50;
-      const oppP=100-modelP;
+      const betPlayer=p.bet_on||p.p1||'—';
+      const oppPlayer=isBetHome?(p.p2||'—'):(p.p1||'—');
+      const betCn=isBetHome?(p.p1_cn||''):(p.p2_cn||'');
+      const oppCn=isBetHome?(p.p2_cn||''):(p.p1_cn||'');
+      const betElo=isBetHome?p.elo1:p.elo2;
+      const oppElo=isBetHome?p.elo2:p.elo1;
+      const betSv=isBetHome?p.p1_sv_pct:p.p2_sv_pct;
+      const oppSv=isBetHome?p.p2_sv_pct:p.p1_sv_pct;
+      const modelP=+(p.model_p||50);
+      const dvP=+(p.dv_p||50);
+      const edge=+(p.edge||0);
       const surf=p.surface||'hard';
+      const commenceUTC=p.commence||'';
+      const twTime=toTaiwanTime(commenceUTC);
+      const cdText=getCountdown(commenceUTC);
+      const tourName=p.tournament?p.tournament.charAt(0).toUpperCase()+p.tournament.slice(1):'';
+      const tourLevel=p.sport_title||p.tour||'';
+      const eloHiBet=betElo&&oppElo&&betElo>oppElo;
+
       const card=document.createElement('div');
       card.className=`pick-card tier-${tier} reveal`;
       card.innerHTML=`
-        <div class="pick-top">
-          <span class="tier-badge ${tier}">${tierLabel(tier)}</span>
-          <span class="surface-chip ${surfClass(surf)}">${surfLabel(surf)}</span>
-        </div>
-        <div class="players-row">
-          <div class="player-box">
-            <div class="player-avatar ${isBetHome?'pa-bet':'pa-other'}">${isBetHome?betAvatar:oppAvatar}</div>
-            <div class="player-name">${p.p1||'—'}</div>
-            <div class="player-rank">${p.tour||''}</div>
+        <div class="pc-header">
+          <div class="pc-header-left">
+            <span class="tier-badge ${tier}">${tierLabel(tier)}</span>
+            <span class="surface-chip ${surfClass(surf)}">${surfLabel(surf)}</span>
           </div>
-          <div class="vs-box"><span class="vs-text">vs</span></div>
-          <div class="player-box">
-            <div class="player-avatar ${!isBetHome?'pa-bet':'pa-other'}">${!isBetHome?betAvatar:oppAvatar}</div>
-            <div class="player-name">${p.p2||'—'}</div>
-            <div class="player-rank">${p.tour||''}</div>
+          <div class="pc-header-right">
+            ${commenceUTC?`<span class="pc-time">${twTime} TST</span>`:''}
+            ${commenceUTC?`<span class="pc-countdown ${cdText==='started'?'started':''}" data-commence="${commenceUTC}">${cdText==='started'?'進行中':cdText}</span>`:''}
           </div>
         </div>
-        <div class="prob-row">
-          <span style="min-width:36px;font-size:.68rem;color:var(--muted)">${fmtPct(modelP)}</span>
-          <div class="prob-bar-wrap"><div class="prob-fill p1" style="width:${modelP}%"></div></div>
-          <span style="min-width:36px;font-size:.68rem;color:var(--muted);text-align:right">${fmtPct(oppP)}</span>
+        ${tourLevel?`<div class="pc-tournament">${tourLevel}${tourName?' · '+tourName:''}</div>`:''}
+        <div class="pc-players">
+          <div class="pc-player${isBetHome?' bet-side':''}">
+            <img class="pc-photo ${isBetHome?'bet-photo':'opp-photo'}" src="${avatarUrl(p.p1||'?',isBetHome)}" alt="${p.p1||''}">
+            <div class="pc-pname">${p.p1||'—'}</div>
+            ${(isBetHome?p.p1_cn:p.p2_cn)?`<div class="pc-pcn">${isBetHome?p.p1_cn:p.p2_cn}</div>`:''}
+            <div class="pc-pstats">
+              ${p.elo1!=null?`<div class="pc-stat"><span class="pc-stat-val${isBetHome&&eloHiBet?' elo-hi':''}">${Math.round(p.elo1)}</span><span>ELO</span></div>`:''}
+              ${p.p1_sv_pct!=null?`<div class="pc-stat"><span class="pc-stat-val">${(+p.p1_sv_pct).toFixed(1)}%</span><span>發球</span></div>`:''}
+            </div>
+          </div>
+          <div class="pc-vs-col">
+            <span class="pc-vs">vs</span>
+            <div class="pc-bet-arrow">${isBetHome?'← 押':'押 →'}</div>
+          </div>
+          <div class="pc-player${!isBetHome?' bet-side':''}">
+            <img class="pc-photo ${!isBetHome?'bet-photo':'opp-photo'}" src="${avatarUrl(p.p2||'?',!isBetHome)}" alt="${p.p2||''}">
+            <div class="pc-pname">${p.p2||'—'}</div>
+            ${(!isBetHome?p.p2_cn:p.p1_cn)?`<div class="pc-pcn">${!isBetHome?p.p2_cn:p.p1_cn}</div>`:''}
+            <div class="pc-pstats">
+              ${p.elo2!=null?`<div class="pc-stat"><span class="pc-stat-val${!isBetHome&&!eloHiBet?' elo-hi':''}">${Math.round(p.elo2)}</span><span>ELO</span></div>`:''}
+              ${p.p2_sv_pct!=null?`<div class="pc-stat"><span class="pc-stat-val">${(+p.p2_sv_pct).toFixed(1)}%</span><span>發球</span></div>`:''}
+            </div>
+          </div>
         </div>
-        <div class="pick-metrics">
-          <div class="pm-item"><div class="pm-label">優勢</div><div class="pm-val green">${fmtEdge(p.edge||0)}</div></div>
+        <div class="pc-probs">
+          <div class="pc-prob-row">
+            <span class="pc-prob-label">模型</span>
+            <div class="pc-prob-bar"><div class="pc-prob-fill fill-model" style="width:${modelP}%"></div></div>
+            <span class="pc-prob-val" style="color:var(--cyan)">${fmtPct(modelP)}</span>
+          </div>
+          <div class="pc-prob-row">
+            <span class="pc-prob-label">市場</span>
+            <div class="pc-prob-bar"><div class="pc-prob-fill fill-market" style="width:${dvP}%"></div></div>
+            <span class="pc-prob-val" style="color:var(--gold)">${fmtPct(dvP)}</span>
+          </div>
+          <span class="pc-edge-tag${edge>=15?' edge-hi':''}">優勢 ${fmtEdge(edge)}</span>
+        </div>
+        <div class="pc-metrics">
+          <div class="pm-item"><div class="pm-label">Kelly 投注</div><div class="pm-val cyan">${(p.stake||0).toFixed(1)}u</div></div>
           <div class="pm-item"><div class="pm-label">賠率</div><div class="pm-val gold">${(p.best_price||p.price||0).toFixed(2)}</div></div>
-          <div class="pm-item"><div class="pm-label">投注</div><div class="pm-val cyan">${(p.stake||0).toFixed(1)}u</div></div>
-          <div class="pm-item"><div class="pm-label">押注</div><div class="pm-val" style="font-size:.8rem">${(p.bet_on||'—').split(' ').pop()}</div></div>
+          <div class="pm-item"><div class="pm-label">模型信心</div><div class="pm-val green">${fmtPct(p.conf||0)}</div></div>
+          <div class="pm-item"><div class="pm-label">書商數量</div><div class="pm-val">${p.n_books||'—'}</div></div>
+        </div>
+        <div class="pc-bet-footer">
+          <span class="pc-bet-label">押注</span>
+          <span class="pc-bet-name">${betPlayer}${betCn?' · '+betCn:''}</span>
+          <span class="pc-bet-odds">@${(p.best_price||p.price||0).toFixed(2)}</span>
         </div>
       `;
       grid.appendChild(card);observer.observe(card);
@@ -651,7 +882,7 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
     picksContainer.appendChild(grid);
   }
 
-  // Intel grid
+  // ── INTEL GRID ──
   const allMatches=Object.values(gamePreds);
   let visibleCount=12;
   const intelGrid=document.getElementById('intel-grid');
@@ -676,7 +907,7 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
           <span class="ic-surface surface-chip ${surfClass(m.surface)}">${surfLabel(m.surface)}</span>
         </div>
         <div class="ic-players">
-          <div class="ic-avatar">${initials(m.p1||'')}</div>
+          <div class="ic-avatar"><img src="${avatarUrl(m.p1||'?',false)}" alt="${m.p1||''}"></div>
           <div class="ic-names">
             <div class="ic-p1">${m.p1||'—'}</div>
             <div class="ic-p2">vs ${m.p2||'—'}</div>
@@ -703,19 +934,20 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
   if(allMatches.length>0)renderIntel();
   else intelGrid.innerHTML='<p style="color:var(--muted);font-size:.85rem;grid-column:1/-1;text-align:center;padding:40px">暫無比賽資料</p>';
 
-  // History
+  // ── HISTORY ──
   const histRows=document.getElementById('history-rows');
   if(history.length===0){
     histRows.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);font-size:.85rem">尚無歷史紀錄</div>';
   } else {
     history.slice().reverse().forEach(h=>{
-      const win=h.result==='win';const loss=h.result==='loss';
+      const win=h.result==='win'||h.result==='W';
+      const loss=h.result==='loss'||h.result==='L';
       const row=document.createElement('div');row.className='history-row';
       row.innerHTML=`
         <span class="hr-match">${h.p1||'—'} vs ${h.p2||'—'}</span>
         <span class="hr-bet">${h.bet_on||'—'}</span>
         <span class="hr-val">${(h.price||0).toFixed(2)}</span>
-        <span class="hr-val ${win?'green':loss?'red':''}" style="color:${win?'var(--green)':loss?'var(--red)':'var(--muted)'}">${fmtEdge(h.edge||0)}</span>
+        <span class="hr-val" style="color:${win?'var(--green)':loss?'var(--red)':'var(--muted)'}">${fmtEdge(h.edge||0)}</span>
         <span class="hr-val">${(h.stake||0).toFixed(1)}u</span>
         <span class="surface-chip ${surfClass(h.surface)}" style="font-size:.6rem;padding:2px 7px;display:inline-block">${surfLabel(h.surface)}</span>
         <span class="hr-val" style="text-transform:uppercase;letter-spacing:1px">${h.tour||'—'}</span>
@@ -725,7 +957,7 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
     });
   }
 
-  // Live matches
+  // ── LIVE MATCHES ──
   if(liveMatches.length>0){
     document.getElementById('live-section').style.display='block';
     document.getElementById('live-badge').style.display='flex';
