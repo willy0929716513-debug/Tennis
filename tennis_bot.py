@@ -10,6 +10,7 @@ Tennis Bot v4.0 — ATP/WTA 巡迴賽預測系統
 
 import csv
 import datetime
+import functools
 import io
 import json
 import logging
@@ -38,6 +39,7 @@ GIST_TOKEN    = os.environ.get("GIST_TOKEN", "")
 GIST_ID       = os.environ.get("GIST_ID", "")
 
 JSON_PATH     = "docs/picks_latest.json"
+HISTORY_PATH  = "docs/history.json"
 
 KELLY         = 0.25
 KELLY_MAX     = 200.0
@@ -53,6 +55,7 @@ MAX_PICKS     = 6
 # v4.0 model improvements
 PROB_CALIB_ALPHA  = 0.88   # regress extreme probs toward 0.5 (over-confidence correction)
 FORM_DECAY_LAMBDA = 0.12   # exponential form decay per match position
+_FORM_WEIGHTS: List[float] = [math.exp(-FORM_DECAY_LAMBDA * i) for i in range(30)]
 ELO_RECENT_MULT   = {      # K-factor recency multiplier by days ago
     180: 1.00,  # last 6 months: full weight
     540: 0.70,  # 6–18 months
@@ -1208,6 +1211,13 @@ _DYNAMIC_H2H:         Dict[Tuple[str, str, str], Tuple[int, int]] = {}  # (p1,p2
 _DYNAMIC_H2H_OVERALL: Dict[Tuple[str, str],       Tuple[int, int]] = {}  # (p1,p2)→(w1,w2)
 _LIVE_RANKS: Dict[str, Tuple[int, str]] = {}  # norm_key → (current_rank, "atp"|"wta")
 
+ALL_DB: Dict[str, dict] = {**ATP_STATS, **WTA_STATS}
+
+
+def normalize_surface(s: str) -> str:
+    return s if s in ("hard", "clay", "grass") else "hard"
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # MARKOV CHAIN TENNIS MODEL
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1416,8 +1426,7 @@ def get_court_speed_adj(sport_key: str, tournament: str = "") -> float:
 
 def age_fatigue_mult(player_key: str) -> float:
     """Players over 28 accumulate fatigue faster; returns multiplier >= 1.0."""
-    all_players = {**ATP_STATS, **WTA_STATS}
-    by = all_players.get(player_key, {}).get("birth_year")
+    by = ALL_DB.get(player_key, {}).get("birth_year")
     if not by:
         return 1.0
     age = datetime.datetime.utcnow().year - by
@@ -1428,9 +1437,8 @@ def age_fatigue_mult(player_key: str) -> float:
 
 def lefty_matchup_adj(p1_key: str, p2_key: str, surface: str) -> float:
     """Serve point bonus when left-hander serves against right-hander."""
-    all_players = {**ATP_STATS, **WTA_STATS}
-    h1 = all_players.get(p1_key, {}).get("hand", "R")
-    h2 = all_players.get(p2_key, {}).get("hand", "R")
+    h1 = ALL_DB.get(p1_key, {}).get("hand", "R")
+    h2 = ALL_DB.get(p2_key, {}).get("hand", "R")
     if h1 == h2:
         return 0.0
     bonus = LEFTY_SERVE_BONUS
@@ -1443,11 +1451,10 @@ def backhand_matchup_adj(p1_key: str, p2_key: str, surface: str) -> float:
     """1h backhand vulnerability vs heavy lefty topspin on clay."""
     if surface != "clay":
         return 0.0
-    all_players = {**ATP_STATS, **WTA_STATS}
-    bh1 = all_players.get(p1_key, {}).get("backhand", "2h")
-    bh2 = all_players.get(p2_key, {}).get("backhand", "2h")
-    h1  = all_players.get(p1_key, {}).get("hand", "R")
-    h2  = all_players.get(p2_key, {}).get("hand", "R")
+    bh1 = ALL_DB.get(p1_key, {}).get("backhand", "2h")
+    bh2 = ALL_DB.get(p2_key, {}).get("backhand", "2h")
+    h1  = ALL_DB.get(p1_key, {}).get("hand", "R")
+    h2  = ALL_DB.get(p2_key, {}).get("hand", "R")
     adj = 0.0
     if bh1 == "1h" and h2 == "L":
         adj -= BH_TOPSPIN_VULN
@@ -1630,6 +1637,7 @@ def conditioning_adj(p1_key: str, p2_key: str) -> float:
     return max(-0.04, min(0.04, penalty(m2) - penalty(m1)))
 
 
+@functools.lru_cache(maxsize=8)
 def _dynamic_weights(surface: str, is_wta: bool) -> Dict[str, float]:
     w = dict(DYNAMIC_WEIGHTS.get(surface, DYNAMIC_WEIGHTS["hard"]))
     if is_wta:
@@ -1686,7 +1694,6 @@ def return_depth_adj(p1_key: str, p2_key: str, surface: str, is_wta: bool) -> fl
 
 def injury_risk_adj(p1_key: str, p2_key: str) -> float:
     adj = 0.0
-    all_db = {**ATP_STATS, **WTA_STATS}
     for pkey, sign in ((p1_key, +1), (p2_key, -1)):
         prof = _SACKMANN_PROFILES.get(pkey, {})
         if pkey in _INJURIES:
@@ -1696,7 +1703,7 @@ def injury_risk_adj(p1_key: str, p2_key: str) -> float:
         if prof.get("win_streak", 0) <= -3:
             adj += sign * INJURY_STREAK_PENALTY
         # serve efficiency drop vs season average
-        db_sv = all_db.get(pkey, {}).get("hard", {}).get("svpt_won")
+        db_sv = ALL_DB.get(pkey, {}).get("hard", {}).get("svpt_won")
         recent_sv = prof.get("svpt_won")
         if db_sv and recent_sv and (db_sv - recent_sv) > INJURY_SERVE_DROP_THRESH:
             adj += sign * (-0.020)
@@ -1718,7 +1725,6 @@ def compute_elo_from_sackmann(all_matches: List[dict]) -> None:
     v4.0: Recency-weighted K factor — recent matches carry more weight.
     K=48/40/32 base, scaled by recency: ×1.0 (≤6mo), ×0.70 (6–18mo), ×0.45 (18mo+)
     """
-    all_db = {**ATP_STATS, **WTA_STATS}
     elos: Dict[str, Dict[str, float]] = {}
     now_utc = datetime.datetime.utcnow()
 
@@ -1730,12 +1736,11 @@ def compute_elo_from_sackmann(all_matches: List[dict]) -> None:
         if not wkey or not lkey:
             continue
 
-        surf_raw = (row.get("surface") or "hard").lower()
-        surf = surf_raw if surf_raw in ("hard", "clay", "grass") else "hard"
+        surf = normalize_surface((row.get("surface") or "hard").lower())
 
         for key in (wkey, lkey):
             if key not in elos:
-                pdata = all_db.get(key, {})
+                pdata = ALL_DB.get(key, {})
                 elos[key] = {
                     "hard":  float(pdata.get("hard",  {}).get("elo", 1500)),
                     "clay":  float(pdata.get("clay",  {}).get("elo", 1500)),
@@ -1804,8 +1809,7 @@ def compute_dynamic_h2h(all_matches: List[dict]) -> None:
             except ValueError:
                 continue
 
-        surf_raw = (row.get("surface") or "hard").lower()
-        surf = surf_raw if surf_raw in ("hard", "clay", "grass") else "hard"
+        surf = normalize_surface((row.get("surface") or "hard").lower())
 
         # Canonical order: alphabetical so (a,b) and (b,a) map to same key
         if wkey <= lkey:
@@ -1894,8 +1898,7 @@ def detect_injuries(all_matches: List[dict]) -> set:
         loser = (row.get("loser_name") or "").lower()
         if loser:
             key = norm_player(loser)
-            all_db = {**ATP_STATS, **WTA_STATS}
-            if key in all_db:
+            if key in ALL_DB:
                 injured.add(key)
                 log.info("auto-injury: %s (%s)", key, row.get("loser_name"))
     return injured
@@ -2408,31 +2411,20 @@ def norm_player(name: str, tour: str = "") -> str:
 
 
 def get_surface_stats(key: str, surface: str, tour: str = "") -> dict:
-    players = {**ATP_STATS, **WTA_STATS}
-    surf = surface if surface in ("hard", "clay", "grass") else "hard"
-    has_static = key in players
+    surf = normalize_surface(surface)
+    has_static = key in ALL_DB
 
     # If not in static database, check live rankings for rank-based stats
     if not has_static and key in _LIVE_RANKS:
         rank, live_tour = _LIVE_RANKS[key]
         base = _rank_based_stats(rank, surf, live_tour)
     else:
-        if not has_static:
-            # Defaults must be consistent: elo=1500 ≈ WTA rank 170+ / ATP rank 180+
-            # Match the floor values from _rank_based_stats to avoid ELO/MC divergence
-            is_wta_player = (tour == "wta") or (key in WTA_STATS)
-            if is_wta_player:
-                default = {"svpt_won": 0.520, "rtpt_won": 0.340, "elo": 1500}
-            else:
-                default = {"svpt_won": 0.590, "rtpt_won": 0.315, "elo": 1500}
-        else:
-            # has_static=True but surface entry may be missing — keep tour-aware fallback
-            is_wta_player = (tour == "wta") or (key in WTA_STATS)
-            if is_wta_player:
-                default = {"svpt_won": 0.520, "rtpt_won": 0.340, "elo": 1500}
-            else:
-                default = {"svpt_won": 0.590, "rtpt_won": 0.315, "elo": 1500}
-        base = dict(players.get(key, {}).get(surf, default))
+        is_wta_player = (tour == "wta") or (key in WTA_STATS)
+        default = (
+            {"svpt_won": 0.520, "rtpt_won": 0.340, "elo": 1500} if is_wta_player
+            else {"svpt_won": 0.590, "rtpt_won": 0.315, "elo": 1500}
+        )
+        base = dict(ALL_DB.get(key, {}).get(surf, default))
 
     live_elo = _LIVE_ELO.get(key, {}).get(surf)
     if live_elo:
@@ -2490,8 +2482,7 @@ def infer_tour_level(sport_key: str, tournament: str = "") -> str:
 
 def data_quality_score(key: str) -> float:
     """0.2=generic fallback only, 0.65=live rank only, 0.72=static only, 1.0=full static+Sackmann"""
-    static = {**ATP_STATS, **WTA_STATS}
-    has_static = key in static
+    has_static = key in ALL_DB
     has_live_rank = key in _LIVE_RANKS
     prof = _SACKMANN_PROFILES.get(key, {})
     n = prof.get("n_matches", 0)
@@ -2560,7 +2551,7 @@ def _name_matches(csv_name: str, full_name: str) -> bool:
 
 def _rank_based_stats(rank: int, surface: str, tour: str) -> dict:
     """Compute estimated ELO/serve/return stats from current ranking."""
-    surf = surface if surface in ("hard", "clay", "grass") else "hard"
+    surf = normalize_surface(surface)
     r = max(1, rank)
     if tour == "wta":
         hard_elo = max(1550, 1950 - max(0, r - 10) * 2.8)
@@ -2834,8 +2825,7 @@ def build_player_profile(all_matches: List[dict], full_name: str,
     last_surf_days = 999
     if player_rows:
         last_row = player_rows[0][0]
-        ls_raw = (last_row.get("surface") or "hard").lower()
-        last_surface = ls_raw if ls_raw in ("hard", "clay", "grass") else "hard"
+        last_surface = normalize_surface((last_row.get("surface") or "hard").lower())
         ls_date = last_row.get("tourney_date", "")
         if len(ls_date) == 8:
             try:
@@ -2969,7 +2959,7 @@ def build_player_profile(all_matches: List[dict], full_name: str,
             surf_rt[surf_key].append(1.0 - rt_val)
 
     # v4.0: exponential decay (λ=FORM_DECAY_LAMBDA) — recent matches weighted higher
-    weights   = [math.exp(-FORM_DECAY_LAMBDA * i) for i in range(len(results))]
+    weights   = _FORM_WEIGHTS[:len(results)]
     total_w   = sum(weights)
     form_rate = sum(r * w for r, w in zip(results, weights)) / total_w if total_w > 0 else 0.5
 
@@ -3035,8 +3025,6 @@ def load_sackmann_data(all_matches: Optional[List[dict]] = None) -> None:
     if not all_matches:
         log.warning("load_sackmann_data: no match data — using static stats only")
         return
-    all_players = {**ATP_STATS, **WTA_STATS}
-
     # Also collect players from Sackmann data who are NOT in the static list
     # (e.g. qualifiers, lower-ranked players currently in ATP/WTA draws)
     extra_players: Dict[str, str] = {}   # key → full_name
@@ -3046,10 +3034,10 @@ def load_sackmann_data(all_matches: Optional[List[dict]] = None) -> None:
             if not name:
                 continue
             key = norm_player(name.lower())
-            if key not in all_players and key not in extra_players:
+            if key not in ALL_DB and key not in extra_players:
                 extra_players[key] = name
     ok = 0
-    for key, pdata in all_players.items():
+    for key, pdata in ALL_DB.items():
         full_name = pdata.get("full_name", "")
         if not full_name:
             continue
@@ -3180,12 +3168,13 @@ def predict(p1_key: str, p2_key: str, surface: str,
     effective_clutch = clutch_val * (1.40 if best_of == 5 else 1.0)
     effective_clutch = max(-0.10, min(0.10, effective_clutch))
 
-    blend_raw = (
-        raw_prob + fat_adj_val + form_adj_val + h2h_val + effective_clutch
+    total_adj = (
+        fat_adj_val + form_adj_val + h2h_val + effective_clutch
         + df_val + bh_val + streak_val + wind_val
         + bo5_val + fs_val + bp_atk_val + cond_val
         + style_val + surf_trans_val + ret_depth_val + ace_val + inj_val
     )
+    blend_raw = raw_prob + max(-0.20, min(0.20, total_adj))
 
     # v4.0: Probability calibration — regress extreme predictions toward 0.5
     # WTA gets extra dampening (α×0.96) due to higher match volatility
@@ -3194,6 +3183,8 @@ def predict(p1_key: str, p2_key: str, surface: str,
     blend = max(0.05, min(0.95, blend_cal))
 
     exp_g = expected_total_games(p1_sv, p2_sv, best_of=best_of)
+    if math.isnan(exp_g):
+        exp_g = float(best_of * 6)
 
     log.info(
         "predict %s vs %s [%s%s] ELO=%.3f MC=%.3f HB=%.3f ADV=%.3f raw=%.3f "
@@ -3667,6 +3658,16 @@ def generate_picks(matches: List[dict],
 # ─────────────────────────────────────────────────────────────────────────────
 
 def load_history() -> dict:
+    # Primary: local file committed to repo (works without Gist credentials)
+    if os.path.exists(HISTORY_PATH):
+        try:
+            with open(HISTORY_PATH, encoding="utf-8") as f:
+                data = json.load(f)
+                log.info("load_history: loaded %d bets from %s", len(data.get("bets", [])), HISTORY_PATH)
+                return data
+        except Exception as e:
+            log.warning("load_history file: %s", e)
+    # Fallback: GitHub Gist
     if not GIST_TOKEN or not GIST_ID:
         return {"bets": []}
     try:
@@ -3676,11 +3677,11 @@ def load_history() -> dict:
             timeout=15,
         )
         r.raise_for_status()
-        data = r.json()
+        gist_data = r.json()
     except Exception as e:
-        log.warning("load_history: %s", e)
+        log.warning("load_history gist: %s", e)
         return {"bets": []}
-    for fname, fd in data.get("files", {}).items():
+    for fname, fd in gist_data.get("files", {}).items():
         if fname.endswith(".json"):
             try:
                 return json.loads(fd.get("content", "{}"))
@@ -3690,6 +3691,15 @@ def load_history() -> dict:
 
 
 def save_history(hist: dict) -> None:
+    # Primary: write to local file (committed to repo by GitHub Actions)
+    os.makedirs("docs", exist_ok=True)
+    try:
+        with open(HISTORY_PATH, "w", encoding="utf-8") as f:
+            json.dump(hist, f, ensure_ascii=False, indent=2)
+        log.info("save_history: wrote %d bets to %s", len(hist.get("bets", [])), HISTORY_PATH)
+    except Exception as e:
+        log.warning("save_history file: %s", e)
+    # Sync to Gist as backup if configured
     if not GIST_TOKEN or not GIST_ID:
         return
     try:
@@ -3701,7 +3711,7 @@ def save_history(hist: dict) -> None:
             timeout=15,
         )
     except Exception as e:
-        log.warning("save_history: %s", e)
+        log.warning("save_history gist: %s", e)
 
 
 def picks_starting_soon(picks: List[dict], now_utc: datetime.datetime,
@@ -3758,13 +3768,19 @@ def record_picks_to_history(picks: List[dict], hist: dict,
             "date":         today,
             "p1":           p["p1"],
             "p2":           p["p2"],
+            "p1_cn":        p.get("p1_cn", ""),
+            "p2_cn":        p.get("p2_cn", ""),
             "bet_on":       p["bet_on"],
+            "bet_on_cn":    p.get("bet_on_cn", ""),
             "price":        p["best_price"],
             "stake":        p["stake"],
             "edge":         p["edge"],
             "tier":         p["tier"],
             "surface":      p["surface"],
             "tour":         p["tour"],
+            "tour_type":    p.get("tour_type", ""),
+            "commence":     p.get("commence", ""),
+            "recorded_at":  datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
             "result":       "P",
             "opening_dv_p": p.get("opening_dv_p"),
             "model_p":      p.get("model_p"),
@@ -3775,21 +3791,57 @@ def record_picks_to_history(picks: List[dict], hist: dict,
 
 
 def compute_stats(hist: dict) -> dict:
-    bets = [b for b in hist.get("bets", []) if b.get("result") in ("W", "L")]
+    all_bets = hist.get("bets", [])
+    bets = [b for b in all_bets if b.get("result") in ("W", "L")]
+    pending = sum(1 for b in all_bets if b.get("result") == "P")
+
+    def _agg(subset: List[dict]) -> Optional[dict]:
+        if not subset:
+            return None
+        w = sum(1 for b in subset if b["result"] == "W")
+        total_in = sum(b.get("stake", 100) for b in subset)
+        pnl = sum(
+            b.get("stake", 100) * (b.get("price", 2.0) - 1) if b["result"] == "W"
+            else -b.get("stake", 100)
+            for b in subset
+        )
+        return {
+            "settled":  len(subset),
+            "wins":     w,
+            "win_rate": round(w / len(subset) * 100, 1),
+            "pnl":      round(pnl, 1),
+            "roi":      round(pnl / total_in * 100, 1) if total_in > 0 else 0.0,
+        }
+
     if not bets:
-        return {"settled": 0, "wins": 0, "win_rate": 0.0, "roi": 0.0, "pnl": 0.0}
-    wins     = sum(1 for b in bets if b["result"] == "W")
-    total_in = sum(b.get("stake", 100) for b in bets)
-    pnl      = sum(
-        b.get("stake", 100) * (b.get("price", 2.0) - 1) if b["result"] == "W"
-        else -b.get("stake", 100)
-        for b in bets
-    )
+        return {
+            "settled": 0, "wins": 0, "win_rate": 0.0, "roi": 0.0, "pnl": 0.0,
+            "pending": pending,
+            "streak": 0,
+            "by_tier": {}, "by_surface": {},
+        }
+
+    overall = _agg(bets)
+
+    # Current streak (positive = wins, negative = losses)
+    streak = 0
+    if bets:
+        direction = bets[-1]["result"]
+        for b in reversed(bets):
+            if b["result"] == direction:
+                streak += 1 if direction == "W" else -1
+            else:
+                break
+
+    by_tier    = {t: _agg([b for b in bets if b.get("tier") == t]) for t in ("A", "B", "C")}
+    by_surface = {s: _agg([b for b in bets if b.get("surface") == s]) for s in ("hard", "clay", "grass")}
+
     return {
-        "settled":  len(bets), "wins": wins,
-        "win_rate": round(wins / len(bets) * 100, 1),
-        "pnl":      round(pnl, 1),
-        "roi":      round(pnl / total_in * 100, 1) if total_in > 0 else 0.0,
+        **overall,  # type: ignore[arg-type]
+        "pending":    pending,
+        "streak":     streak,
+        "by_tier":    {k: v for k, v in by_tier.items() if v},
+        "by_surface": {k: v for k, v in by_surface.items() if v},
     }
 
 
@@ -3880,7 +3932,7 @@ def write_json(picks: List[dict], stats: dict, history: dict,
         "model_version": "v4.0 — PowerDevig+DynH2H+ExpForm+RecencyELO+ProbCalib+15factor",
         "stats":         stats,
         "picks":         picks,
-        "recent_history": list(reversed(history.get("bets", [])[-10:])),
+        "recent_history": list(reversed(history.get("bets", [])[-50:])),
         "live_matches":  [],
         "game_preds":    game_preds,
     }
