@@ -302,7 +302,7 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
   .perf-layout{grid-template-columns:1fr}
   .perf-stats{border-right:none;border-bottom:1px solid var(--border)}
   .history-header,.history-row{grid-template-columns:1fr 1fr .7fr .7fr .7fr;overflow:hidden}
-  .hh-col:nth-child(n+6),.hr-val:nth-child(n+6){display:none}
+  .history-header>*:nth-child(n+6),.history-row>*:nth-child(n+6){display:none}
 }
 @media(max-width:540px){
   .hero-title{font-size:2.4rem}
@@ -570,7 +570,7 @@ document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
 function initials(n){return n.split(' ').map(w=>w[0]||'').slice(0,2).join('').toUpperCase()||'?'}
 function surfClass(s){const m={'grass':'surf-grass','clay':'surf-clay','hard':'surf-hard','carpet':'surf-carpet'};return m[(s||'').toLowerCase()]||'surf-hard'}
 function surfLabel(s){const m={'grass':'草地','clay':'紅土','hard':'硬地','carpet':'地毯'};return m[(s||'').toLowerCase()]||(s?s.charAt(0).toUpperCase()+s.slice(1):'硬地')}
-function resultLabel(r){return r==='win'||r==='W'?'贏':r==='loss'||r==='L'?'輸':r==='push'?'平':'?'}
+function resultLabel(r){return r==='win'||r==='W'?'贏':r==='loss'||r==='L'?'輸':r==='push'?'平':r==='P'?'待定':'?'}
 function tierLabel(t){return t==='A'?'精選':t==='B'?'推薦':'普通'}
 function fmtPct(v){return(+v||0).toFixed(1)+'%'}
 function fmtEdge(v){return(v>=0?'+':'')+(+v||0).toFixed(1)+'%'}
@@ -759,14 +759,16 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
 
   // Chart from history
   if(history.length>0){
-    let cumPnl=0;
+    let cumPnl=0,cumWins=0,cumTotal=0;
     history.forEach(h=>{
       const win=h.result==='win'||h.result==='W';
+      const loss=h.result==='loss'||h.result==='L';
       const stake=h.stake||1;const price=h.price||2;
       cumPnl+=win?stake*(price-1):-stake;
+      if(win||loss){cumWins+=win?1:0;cumTotal++;}
       chartLabels.push(h.date?h.date.slice(5):'');
       chartData.pnl.push(+cumPnl.toFixed(2));
-      chartData.wr.push(+(h.model_p||0).toFixed(1));
+      chartData.wr.push(cumTotal>0?+(100*cumWins/cumTotal).toFixed(1):0);
       chartData.edge.push(+(h.edge||0).toFixed(2));
     });
     buildChart('pnl');
@@ -832,7 +834,7 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
           <div class="pc-player${isBetHome?' bet-side':''}">
             <img class="pc-photo ${isBetHome?'bet-photo':'opp-photo'}" src="${avatarUrl(p.p1||'?',isBetHome)}" alt="${p.p1||''}">
             <div class="pc-pname">${p.p1||'—'}</div>
-            ${(isBetHome?p.p1_cn:p.p2_cn)?`<div class="pc-pcn">${isBetHome?p.p1_cn:p.p2_cn}</div>`:''}
+            ${p.p1_cn?`<div class="pc-pcn">${p.p1_cn}</div>`:''}
             <div class="pc-pstats">
               ${p.elo1!=null?`<div class="pc-stat"><span class="pc-stat-val${isBetHome&&eloHiBet?' elo-hi':''}">${Math.round(p.elo1)}</span><span>ELO</span></div>`:''}
               ${p.p1_sv_pct!=null?`<div class="pc-stat"><span class="pc-stat-val">${(+p.p1_sv_pct).toFixed(1)}%</span><span>發球</span></div>`:''}
@@ -845,7 +847,7 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
           <div class="pc-player${!isBetHome?' bet-side':''}">
             <img class="pc-photo ${!isBetHome?'bet-photo':'opp-photo'}" src="${avatarUrl(p.p2||'?',!isBetHome)}" alt="${p.p2||''}">
             <div class="pc-pname">${p.p2||'—'}</div>
-            ${(!isBetHome?p.p2_cn:p.p1_cn)?`<div class="pc-pcn">${!isBetHome?p.p2_cn:p.p1_cn}</div>`:''}
+            ${p.p2_cn?`<div class="pc-pcn">${p.p2_cn}</div>`:''}
             <div class="pc-pstats">
               ${p.elo2!=null?`<div class="pc-stat"><span class="pc-stat-val${!isBetHome&&!eloHiBet?' elo-hi':''}">${Math.round(p.elo2)}</span><span>ELO</span></div>`:''}
               ${p.p2_sv_pct!=null?`<div class="pc-stat"><span class="pc-stat-val">${(+p.p2_sv_pct).toFixed(1)}%</span><span>發球</span></div>`:''}
