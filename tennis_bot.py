@@ -2412,12 +2412,13 @@ def get_surface_stats(key: str, surface: str, tour: str = "") -> dict:
         base = _rank_based_stats(rank, surf, live_tour)
     else:
         if not has_static:
-            # Use tour-appropriate defaults: WTA players serve and return very differently from ATP
+            # Defaults must be consistent: elo=1500 ≈ WTA rank 170+ / ATP rank 180+
+            # Match the floor values from _rank_based_stats to avoid ELO/MC divergence
             is_wta_player = (tour == "wta") or (key in WTA_STATS)
             if is_wta_player:
-                default = {"svpt_won": 0.545, "rtpt_won": 0.375, "elo": 1500}
+                default = {"svpt_won": 0.520, "rtpt_won": 0.340, "elo": 1500}
             else:
-                default = {"svpt_won": 0.610, "rtpt_won": 0.330, "elo": 1500}
+                default = {"svpt_won": 0.590, "rtpt_won": 0.315, "elo": 1500}
         else:
             default = {"svpt_won": 0.610, "rtpt_won": 0.330, "elo": 1500}
         base = dict(players.get(key, {}).get(surf, default))
