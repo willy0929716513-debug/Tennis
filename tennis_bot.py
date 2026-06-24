@@ -39,6 +39,7 @@ GIST_TOKEN    = os.environ.get("GIST_TOKEN", "")
 GIST_ID       = os.environ.get("GIST_ID", "")
 
 JSON_PATH     = "docs/picks_latest.json"
+HISTORY_PATH  = "docs/history.json"
 
 KELLY         = 0.25
 KELLY_MAX     = 200.0
@@ -3657,6 +3658,16 @@ def generate_picks(matches: List[dict],
 # ─────────────────────────────────────────────────────────────────────────────
 
 def load_history() -> dict:
+    # Primary: local file committed to repo (works without Gist credentials)
+    if os.path.exists(HISTORY_PATH):
+        try:
+            with open(HISTORY_PATH, encoding="utf-8") as f:
+                data = json.load(f)
+                log.info("load_history: loaded %d bets from %s", len(data.get("bets", [])), HISTORY_PATH)
+                return data
+        except Exception as e:
+            log.warning("load_history file: %s", e)
+    # Fallback: GitHub Gist
     if not GIST_TOKEN or not GIST_ID:
         return {"bets": []}
     try:
@@ -3666,11 +3677,11 @@ def load_history() -> dict:
             timeout=15,
         )
         r.raise_for_status()
-        data = r.json()
+        gist_data = r.json()
     except Exception as e:
-        log.warning("load_history: %s", e)
+        log.warning("load_history gist: %s", e)
         return {"bets": []}
-    for fname, fd in data.get("files", {}).items():
+    for fname, fd in gist_data.get("files", {}).items():
         if fname.endswith(".json"):
             try:
                 return json.loads(fd.get("content", "{}"))
@@ -3680,6 +3691,15 @@ def load_history() -> dict:
 
 
 def save_history(hist: dict) -> None:
+    # Primary: write to local file (committed to repo by GitHub Actions)
+    os.makedirs("docs", exist_ok=True)
+    try:
+        with open(HISTORY_PATH, "w", encoding="utf-8") as f:
+            json.dump(hist, f, ensure_ascii=False, indent=2)
+        log.info("save_history: wrote %d bets to %s", len(hist.get("bets", [])), HISTORY_PATH)
+    except Exception as e:
+        log.warning("save_history file: %s", e)
+    # Sync to Gist as backup if configured
     if not GIST_TOKEN or not GIST_ID:
         return
     try:
@@ -3691,7 +3711,7 @@ def save_history(hist: dict) -> None:
             timeout=15,
         )
     except Exception as e:
-        log.warning("save_history: %s", e)
+        log.warning("save_history gist: %s", e)
 
 
 def picks_starting_soon(picks: List[dict], now_utc: datetime.datetime,
@@ -3748,13 +3768,19 @@ def record_picks_to_history(picks: List[dict], hist: dict,
             "date":         today,
             "p1":           p["p1"],
             "p2":           p["p2"],
+            "p1_cn":        p.get("p1_cn", ""),
+            "p2_cn":        p.get("p2_cn", ""),
             "bet_on":       p["bet_on"],
+            "bet_on_cn":    p.get("bet_on_cn", ""),
             "price":        p["best_price"],
             "stake":        p["stake"],
             "edge":         p["edge"],
             "tier":         p["tier"],
             "surface":      p["surface"],
             "tour":         p["tour"],
+            "tour_type":    p.get("tour_type", ""),
+            "commence":     p.get("commence", ""),
+            "recorded_at":  datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
             "result":       "P",
             "opening_dv_p": p.get("opening_dv_p"),
             "model_p":      p.get("model_p"),
@@ -3765,21 +3791,57 @@ def record_picks_to_history(picks: List[dict], hist: dict,
 
 
 def compute_stats(hist: dict) -> dict:
-    bets = [b for b in hist.get("bets", []) if b.get("result") in ("W", "L")]
+    all_bets = hist.get("bets", [])
+    bets = [b for b in all_bets if b.get("result") in ("W", "L")]
+    pending = sum(1 for b in all_bets if b.get("result") == "P")
+
+    def _agg(subset: List[dict]) -> Optional[dict]:
+        if not subset:
+            return None
+        w = sum(1 for b in subset if b["result"] == "W")
+        total_in = sum(b.get("stake", 100) for b in subset)
+        pnl = sum(
+            b.get("stake", 100) * (b.get("price", 2.0) - 1) if b["result"] == "W"
+            else -b.get("stake", 100)
+            for b in subset
+        )
+        return {
+            "settled":  len(subset),
+            "wins":     w,
+            "win_rate": round(w / len(subset) * 100, 1),
+            "pnl":      round(pnl, 1),
+            "roi":      round(pnl / total_in * 100, 1) if total_in > 0 else 0.0,
+        }
+
     if not bets:
-        return {"settled": 0, "wins": 0, "win_rate": 0.0, "roi": 0.0, "pnl": 0.0}
-    wins     = sum(1 for b in bets if b["result"] == "W")
-    total_in = sum(b.get("stake", 100) for b in bets)
-    pnl      = sum(
-        b.get("stake", 100) * (b.get("price", 2.0) - 1) if b["result"] == "W"
-        else -b.get("stake", 100)
-        for b in bets
-    )
+        return {
+            "settled": 0, "wins": 0, "win_rate": 0.0, "roi": 0.0, "pnl": 0.0,
+            "pending": pending,
+            "streak": 0,
+            "by_tier": {}, "by_surface": {},
+        }
+
+    overall = _agg(bets)
+
+    # Current streak (positive = wins, negative = losses)
+    streak = 0
+    if bets:
+        direction = bets[-1]["result"]
+        for b in reversed(bets):
+            if b["result"] == direction:
+                streak += 1 if direction == "W" else -1
+            else:
+                break
+
+    by_tier    = {t: _agg([b for b in bets if b.get("tier") == t]) for t in ("A", "B", "C")}
+    by_surface = {s: _agg([b for b in bets if b.get("surface") == s]) for s in ("hard", "clay", "grass")}
+
     return {
-        "settled":  len(bets), "wins": wins,
-        "win_rate": round(wins / len(bets) * 100, 1),
-        "pnl":      round(pnl, 1),
-        "roi":      round(pnl / total_in * 100, 1) if total_in > 0 else 0.0,
+        **overall,  # type: ignore[arg-type]
+        "pending":    pending,
+        "streak":     streak,
+        "by_tier":    {k: v for k, v in by_tier.items() if v},
+        "by_surface": {k: v for k, v in by_surface.items() if v},
     }
 
 
@@ -3870,7 +3932,7 @@ def write_json(picks: List[dict], stats: dict, history: dict,
         "model_version": "v4.0 — PowerDevig+DynH2H+ExpForm+RecencyELO+ProbCalib+15factor",
         "stats":         stats,
         "picks":         picks,
-        "recent_history": list(reversed(history.get("bets", [])[-10:])),
+        "recent_history": list(reversed(history.get("bets", [])[-50:])),
         "live_matches":  [],
         "game_preds":    game_preds,
     }

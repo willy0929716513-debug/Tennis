@@ -269,6 +269,49 @@ section{position:relative;z-index:10;padding:80px 40px}
 .rb-win{background:rgba(0,255,136,.15);color:var(--green);border:1px solid rgba(0,255,136,.25)}
 .rb-loss{background:rgba(255,51,102,.15);color:var(--red);border:1px solid rgba(255,51,102,.25)}
 .rb-push{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--border)}
+.rb-pending{background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.3)}
+
+/* ── BREAKDOWN STATS ── */
+.bk-section{margin-top:24px}
+.bk-title{font-size:.6rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.bk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.bk-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden}
+.bk-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.bk-card.tier-a::before{background:linear-gradient(90deg,var(--gold),transparent)}
+.bk-card.tier-b::before{background:linear-gradient(90deg,var(--cyan),transparent)}
+.bk-card.tier-c::before{background:linear-gradient(90deg,var(--muted),transparent)}
+.bk-card.surf-hard::before{background:linear-gradient(90deg,var(--cyan),transparent)}
+.bk-card.surf-clay::before{background:linear-gradient(90deg,#FF6B35,transparent)}
+.bk-card.surf-grass::before{background:linear-gradient(90deg,var(--green),transparent)}
+.bk-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.bk-name{font-size:.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.bk-settled{font-size:.6rem;color:var(--muted)}
+.bk-wr{font-size:1.5rem;font-weight:900;font-family:'SF Mono',monospace}
+.bk-wr.pos{color:var(--green)}
+.bk-wr.neg{color:var(--red)}
+.bk-wr.neu{color:var(--muted)}
+.bk-sub{display:flex;justify-content:space-between;margin-top:8px;gap:8px}
+.bk-sub-item{display:flex;flex-direction:column;gap:2px}
+.bk-sub-label{font-size:.55rem;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+.bk-sub-val{font-size:.78rem;font-weight:700;font-family:'SF Mono',monospace}
+.bk-sub-val.pos{color:var(--green)}
+.bk-sub-val.neg{color:var(--red)}
+.bk-sub-val.neu{color:var(--cyan)}
+
+/* Pending & streak indicators */
+.ps-extra{display:flex;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.04);flex-wrap:wrap}
+.pending-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.25);color:var(--gold);font-size:.68rem;font-weight:700;letter-spacing:1px}
+.pending-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:pulse 1.5s ease infinite}
+.streak-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;font-size:.68rem;font-weight:700;letter-spacing:1px}
+.streak-pill.win{background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.25);color:var(--green)}
+.streak-pill.loss{background:rgba(255,51,102,.08);border:1px solid rgba(255,51,102,.25);color:var(--red)}
+.streak-pill.none{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted)}
+
+/* History filter tabs */
+.hist-tabs{display:flex;gap:8px;margin-bottom:16px}
+.hist-tab{padding:7px 18px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.72rem;font-weight:600;letter-spacing:1px;cursor:pointer;transition:.15s;text-transform:uppercase}
+.hist-tab.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.08)}
+.hist-count{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:.55rem;font-weight:900;margin-left:5px;background:rgba(255,255,255,.1)}
 
 /* ── LIVE MATCHES ── */
 #live-section{border-top:1px solid var(--border)}
@@ -303,6 +346,7 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
   .perf-stats{border-right:none;border-bottom:1px solid var(--border)}
   .history-header,.history-row{grid-template-columns:1fr 1fr .7fr .7fr .7fr;overflow:hidden}
   .history-header>*:nth-child(n+6),.history-row>*:nth-child(n+6){display:none}
+  .bk-grid{grid-template-columns:1fr}
 }
 @media(max-width:540px){
   .hero-title{font-size:2.4rem}
@@ -526,6 +570,10 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;back
           <div class="perf-stat-row"><span class="psr-label">總損益</span><span class="psr-val" id="ps-pnl">—</span></div>
           <div class="perf-stat-row"><span class="psr-label">投報率</span><span class="psr-val" id="ps-roi">—</span></div>
           <div class="perf-stat-row"><span class="psr-label">今日選注</span><span class="psr-val cyan" id="ps-today">—</span></div>
+          <div class="ps-extra">
+            <span class="pending-pill" id="ps-pending-pill" style="display:none"><span class="pending-dot"></span><span id="ps-pending">0</span> 待結算</span>
+            <span class="streak-pill none" id="ps-streak-pill"><span id="ps-streak">—</span></span>
+          </div>
         </div>
         <div class="chart-area">
           <div class="chart-tabs">
@@ -535,6 +583,18 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;back
           </div>
           <div class="chart-canvas-wrap"><canvas id="perf-chart"></canvas></div>
         </div>
+      </div>
+    </div>
+    <!-- Breakdown: tier + surface -->
+    <div class="bk-section reveal" id="breakdown-section" style="display:none">
+      <div class="bk-title">分組績效</div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:.6rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">等級分析</div>
+        <div class="bk-grid" id="bk-tier-grid"></div>
+      </div>
+      <div>
+        <div style="font-size:.6rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">場地分析</div>
+        <div class="bk-grid" id="bk-surf-grid"></div>
       </div>
     </div>
   </div>
@@ -556,9 +616,14 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;back
 <section id="history-section">
   <div class="container">
     <div class="reveal">
-      <div class="section-label">歷史紀錄</div>
+      <div class="section-label">紀錄系統</div>
       <h2 class="section-title">投注紀錄</h2>
-      <p class="section-sub">已驗證的預測紀錄與結果</p>
+      <p class="section-sub">開賽前兩小時自動記錄，完賽後更新結果</p>
+    </div>
+    <div class="hist-tabs reveal">
+      <button class="hist-tab active" data-htab="all">全部<span class="hist-count" id="htab-all-count">0</span></button>
+      <button class="hist-tab" data-htab="pending">待結算<span class="hist-count" id="htab-pending-count" style="background:rgba(255,215,0,.25);color:var(--gold)">0</span></button>
+      <button class="hist-tab" data-htab="settled">已結算<span class="hist-count" id="htab-settled-count">0</span></button>
     </div>
     <div class="history-wrap reveal">
       <div class="history-header">
@@ -837,6 +902,40 @@ function loadData(isRefresh){
   document.getElementById('term-update').textContent=data.generated_at||'—';
   document.getElementById('footer-gen').textContent='生成時間：'+(data.generated_at||'—');
 
+  // Pending & streak
+  const pending=stats.pending||0;
+  const streak=stats.streak||0;
+  if(pending>0){
+    document.getElementById('ps-pending').textContent=pending;
+    document.getElementById('ps-pending-pill').style.display='inline-flex';
+  }
+  const streakPill=document.getElementById('ps-streak-pill');
+  const streakEl=document.getElementById('ps-streak');
+  if(streak>0){streakEl.textContent='連贏'+streak;streakPill.className='streak-pill win';}
+  else if(streak<0){streakEl.textContent='連敗'+Math.abs(streak);streakPill.className='streak-pill loss';}
+  else{streakEl.textContent='—';streakPill.className='streak-pill none';}
+
+  // Breakdown by tier & surface
+  function renderBkCard(key,s,cls){
+    if(!s)return'';
+    const wr=s.win_rate||0;const roi=s.roi||0;const pnl2=s.pnl||0;
+    return`<div class="bk-card ${cls}">
+      <div class="bk-head"><span class="bk-name">${key}</span><span class="bk-settled">${s.settled}注</span></div>
+      <div class="bk-wr ${wr>=55?'pos':wr>=45?'neu':'neg'}">${fmtPct(wr)}</div>
+      <div class="bk-sub">
+        <div class="bk-sub-item"><span class="bk-sub-label">ROI</span><span class="bk-sub-val ${roi>=0?'pos':'neg'}">${fmtEdge(roi)}</span></div>
+        <div class="bk-sub-item"><span class="bk-sub-label">損益</span><span class="bk-sub-val ${pnl2>=0?'pos':'neg'}">${pnl2>=0?'+':''}${pnl2.toFixed(1)}u</span></div>
+        <div class="bk-sub-item"><span class="bk-sub-label">贏注</span><span class="bk-sub-val neu">${s.wins}/${s.settled}</span></div>
+      </div>
+    </div>`;
+  }
+  const byTier=stats.by_tier||{};const bySurf=stats.by_surface||{};
+  const tierGrid=document.getElementById('bk-tier-grid');
+  const surfGrid=document.getElementById('bk-surf-grid');
+  tierGrid.innerHTML=['A','B','C'].map(t=>renderBkCard(t+'級',byTier[t],'tier-'+t.toLowerCase())).join('');
+  surfGrid.innerHTML=[['hard','硬地','surf-hard'],['clay','紅土','surf-clay'],['grass','草地','surf-grass']].map(([k,n,c])=>renderBkCard(n,bySurf[k],c)).join('');
+  if(Object.keys(byTier).length||Object.keys(bySurf).length)document.getElementById('breakdown-section').style.display='block';
+
   // Chart from history
   if(history.length>0){
     let cumPnl=0,cumWins=0,cumTotal=0;
@@ -1018,26 +1117,52 @@ function loadData(isRefresh){
 
   // ── HISTORY ──
   const histRows=document.getElementById('history-rows');
-  if(history.length===0){
-    histRows.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);font-size:.85rem">尚無歷史紀錄</div>';
-  } else {
-    history.slice().reverse().forEach(h=>{
+  let histFilter='all';
+  function renderHistory(){
+    const all=history.slice().reverse();
+    const filtered=histFilter==='pending'?all.filter(h=>h.result==='P'):
+                   histFilter==='settled'?all.filter(h=>h.result==='W'||h.result==='L'):all;
+    histRows.innerHTML='';
+    if(filtered.length===0){
+      histRows.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);font-size:.85rem">'+(histFilter==='pending'?'目前無待結算紀錄':'尚無歷史紀錄')+'</div>';
+      return;
+    }
+    filtered.forEach(h=>{
       const win=h.result==='win'||h.result==='W';
       const loss=h.result==='loss'||h.result==='L';
-      const row=document.createElement('div');row.className='history-row';
+      const isPending=h.result==='P';
+      const row=document.createElement('div');
+      row.className='history-row'+(isPending?' pending-row':'');
+      if(isPending)row.style.background='rgba(255,215,0,.02)';
+      const matchLabel=(h.p1_cn&&h.p2_cn)?`${h.p1||'—'} <span style="color:var(--muted);font-size:.68rem">${h.p1_cn}</span> vs ${h.p2||'—'} <span style="color:var(--muted);font-size:.68rem">${h.p2_cn}</span>`:
+                       `${h.p1||'—'} vs ${h.p2||'—'}`;
+      const betLabel=h.bet_on_cn?`${h.bet_on||'—'} <span style="color:var(--muted);font-size:.68rem">${h.bet_on_cn}</span>`:h.bet_on||'—';
       row.innerHTML=`
-        <span class="hr-match">${h.p1||'—'} vs ${h.p2||'—'}</span>
-        <span class="hr-bet">${h.bet_on||'—'}</span>
+        <span class="hr-match" style="font-size:.75rem">${matchLabel}${h.date?`<br><span style="font-size:.6rem;color:var(--muted)">${h.date}</span>`:''}</span>
+        <span class="hr-bet" style="font-size:.75rem">${betLabel}</span>
         <span class="hr-val">${(h.price||0).toFixed(2)}</span>
         <span class="hr-val" style="color:${win?'var(--green)':loss?'var(--red)':'var(--muted)'}">${fmtEdge(h.edge||0)}</span>
         <span class="hr-val">${(h.stake||0).toFixed(1)}u</span>
         <span class="surface-chip ${surfClass(h.surface)}" style="font-size:.6rem;padding:2px 7px;display:inline-block">${surfLabel(h.surface)}</span>
-        <span class="hr-val" style="text-transform:uppercase;letter-spacing:1px">${h.tour||'—'}</span>
-        <span class="result-badge ${win?'rb-win':loss?'rb-loss':'rb-push'}">${resultLabel(h.result)}</span>
+        <span class="hr-val" style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px">${h.tour_type||h.tour||'—'}</span>
+        <span class="result-badge ${win?'rb-win':loss?'rb-loss':isPending?'rb-pending':'rb-push'}">${isPending?'待結算':resultLabel(h.result)}</span>
       `;
       histRows.appendChild(row);
     });
   }
+  // Tab counts
+  const pendingCount=history.filter(h=>h.result==='P').length;
+  const settledCount=history.filter(h=>h.result==='W'||h.result==='L').length;
+  document.getElementById('htab-all-count').textContent=history.length;
+  document.getElementById('htab-pending-count').textContent=pendingCount;
+  document.getElementById('htab-settled-count').textContent=settledCount;
+  document.querySelectorAll('.hist-tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.hist-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');histFilter=btn.dataset.htab;renderHistory();
+    });
+  });
+  renderHistory();
 
   // ── LIVE MATCHES ──
   if(liveMatches.length>0){

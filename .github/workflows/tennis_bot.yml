@@ -95,10 +95,13 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           cp docs/picks_latest.json /tmp/picks_new.json
+          [ -f docs/history.json ] && cp docs/history.json /tmp/history_new.json || true
           git fetch origin main
           git reset --hard origin/main
           cp /tmp/picks_new.json docs/picks_latest.json
+          [ -f /tmp/history_new.json ] && cp /tmp/history_new.json docs/history.json || true
           git add docs/picks_latest.json
+          [ -f docs/history.json ] && git add docs/history.json || true
           git diff --cached --quiet || git commit -m "chore: update tennis picks [skip ci]"
           git push origin HEAD:main
 
