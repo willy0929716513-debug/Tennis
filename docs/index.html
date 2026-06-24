@@ -314,6 +314,67 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
   .intel-grid{grid-template-columns:1fr}
   .model-grid{grid-template-columns:1fr}
 }
+
+/* ── REFRESH BUTTON ── */
+.refresh-btn{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:100px;border:1px solid rgba(0,255,136,.35);background:rgba(0,255,136,.06);color:var(--green);font-size:.72rem;font-weight:700;letter-spacing:1px;cursor:pointer;transition:.2s;text-transform:uppercase}
+.refresh-btn:hover{background:rgba(0,255,136,.14);border-color:var(--green);box-shadow:var(--glow-green)}
+.refresh-icon{display:inline-block;font-size:.95rem;line-height:1;transition:transform .3s}
+.refresh-btn.spinning .refresh-icon{animation:spin 0.9s linear infinite}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@media(max-width:900px){.refresh-btn span.refresh-label{display:none}}
+
+/* ── TOAST ── */
+#refresh-toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);z-index:9000;padding:12px 28px;border-radius:100px;background:rgba(5,8,22,.92);border:1px solid rgba(0,255,136,.35);color:var(--green);font-size:.78rem;font-weight:700;letter-spacing:1px;transition:transform .45s cubic-bezier(.34,1.56,.64,1),opacity .45s;opacity:0;white-space:nowrap;backdrop-filter:blur(16px);box-shadow:0 8px 40px rgba(0,255,136,.15)}
+#refresh-toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* ── HERO EXTRAS ── */
+.hero-scan{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan) 50%,transparent);animation:heroscan 5s linear infinite;opacity:.55;z-index:2;pointer-events:none}
+@keyframes heroscan{0%{top:0%;opacity:0}5%{opacity:.55}90%{opacity:.55}100%{top:100%;opacity:0}}
+.hero-ring{position:absolute;width:680px;height:680px;border-radius:50%;border:1px solid rgba(0,229,255,.07);top:50%;left:50%;transform:translate(-50%,-50%);animation:ringturn 30s linear infinite;pointer-events:none}
+.hero-ring-2{position:absolute;width:920px;height:920px;border-radius:50%;border:1px dashed rgba(0,255,136,.05);top:50%;left:50%;transform:translate(-50%,-50%);animation:ringturn 55s linear infinite reverse;pointer-events:none}
+@keyframes ringturn{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+.hero-bracket{position:absolute;width:56px;height:56px;opacity:.22;pointer-events:none}
+.hero-bracket.tl{top:24px;left:24px;border-top:2px solid var(--cyan);border-left:2px solid var(--cyan)}
+.hero-bracket.tr{top:24px;right:24px;border-top:2px solid var(--cyan);border-right:2px solid var(--cyan)}
+.hero-bracket.bl{bottom:24px;left:24px;border-bottom:2px solid var(--cyan);border-left:2px solid var(--cyan)}
+.hero-bracket.br{bottom:24px;right:24px;border-bottom:2px solid var(--cyan);border-right:2px solid var(--cyan)}
+
+/* ── HERO ORB HUE CYCLE ── */
+.hero-orb{animation:orbpulse 6s ease infinite,orbhue 14s linear infinite}
+@keyframes orbhue{0%{filter:hue-rotate(0deg)}100%{filter:hue-rotate(25deg)}}
+
+/* ── NAV GLOW BORDER ── */
+nav{border-bottom:none;position:relative}
+nav::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,255,.55) 50%,transparent)}
+
+/* ── TIER-A SHIMMER + GLOW ── */
+.pick-card.tier-A{border-color:rgba(255,215,0,.22);animation:cardglowgold 4s ease infinite}
+@keyframes cardglowgold{0%,100%{box-shadow:0 4px 20px rgba(255,215,0,0)}50%{box-shadow:0 4px 48px rgba(255,215,0,.15),0 0 100px rgba(255,215,0,.04)}}
+.pick-card.tier-A::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,215,0,.06) 50%,transparent 70%);background-size:200% 100%;animation:shimmer 4s ease-in-out infinite;pointer-events:none;z-index:0;border-radius:var(--radius)}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.pc-header,.pc-tournament,.pc-players,.pc-probs,.pc-metrics,.pc-bet-footer{position:relative;z-index:1}
+
+/* ── BET PHOTO PULSING RING ── */
+.pc-photo.bet-photo{animation:photoring 2.5s ease infinite}
+@keyframes photoring{0%,100%{box-shadow:0 0 0 2px var(--cyan),0 0 12px rgba(0,229,255,.3)}50%{box-shadow:0 0 0 3px var(--cyan),0 0 30px rgba(0,229,255,.65),0 0 55px rgba(0,229,255,.12)}}
+
+/* ── INTEL CARD HOVER LINE ── */
+.intel-card{position:relative;overflow:hidden}
+.intel-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0;transition:.3s}
+.intel-card:hover::before{opacity:.5}
+
+/* ── HERO STAT POP ── */
+@keyframes statpop{0%{transform:scale(.8) translateY(8px);opacity:0}80%{transform:scale(1.06)}100%{transform:none;opacity:1}}
+.pop{animation:statpop .5s cubic-bezier(.34,1.56,.64,1) both}
+
+/* ── SECTION TITLE SUBTLE GLOW ── */
+.section-title{text-shadow:0 0 40px rgba(0,229,255,.07)}
+
+/* ── PICK CARD HOVER SHADOW ── */
+.pick-card:hover{transform:translateY(-6px);box-shadow:0 28px 70px rgba(0,229,255,.12),0 0 0 1px rgba(0,229,255,.12)}
+
+/* ── SCANLINES ── */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.025) 3px,rgba(0,0,0,.025) 4px)}
 </style>
 </head>
 <body>
@@ -356,6 +417,10 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
   <div class="nav-right">
     <div id="live-badge" class="live-badge" style="display:none"><span class="live-dot"></span>直播</div>
     <div class="nav-clock" id="nav-clock">--:--:-- TST</div>
+    <button class="refresh-btn" id="refresh-btn" onclick="refreshData()">
+      <span class="refresh-icon">↻</span>
+      <span class="refresh-label">重新整理</span>
+    </button>
     <button class="trigger-btn" id="trigger-btn" onclick="onTriggerClick()">
       <span class="trigger-icon">▶</span>
       <span class="trigger-label">觸發更新</span>
@@ -363,10 +428,20 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
   </div>
 </nav>
 
+<!-- Toast -->
+<div id="refresh-toast">✓ 資料已更新</div>
+
 <!-- Hero -->
 <section id="hero">
   <div class="hero-grid"></div>
   <div class="hero-orb"></div>
+  <div class="hero-ring"></div>
+  <div class="hero-ring-2"></div>
+  <div class="hero-scan"></div>
+  <div class="hero-bracket tl"></div>
+  <div class="hero-bracket tr"></div>
+  <div class="hero-bracket bl"></div>
+  <div class="hero-bracket br"></div>
   <div class="hero-label">AI 智能網球預測系統</div>
   <h1 class="hero-title"><div class="g1">ATP / WTA</div><div class="g2">網球預測平台</div></h1>
   <p class="hero-sub" id="hero-sub">15因子 ELO · 馬可夫鏈 · Kelly 公式 · 即時優勢偵測</p>
@@ -720,7 +795,10 @@ function renderModelGrid(){
 renderModelGrid();
 
 /* ── MAIN DATA LOAD ── */
-fetch('picks_latest.json').then(r=>r.json()).then(data=>{
+function loadData(isRefresh){
+  chartData={pnl:[],wr:[],edge:[]};chartLabels=[];
+  if(chartInstance){chartInstance.destroy();chartInstance=null}
+  fetch('picks_latest.json?t='+Date.now()).then(r=>r.json()).then(data=>{
   const stats=data.stats||{};
   const picks=data.picks||[];
   const history=data.recent_history||[];
@@ -728,10 +806,11 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
   const liveMatches=data.live_matches||[];
 
   // Hero metrics
-  document.getElementById('hm-wr').textContent=stats.win_rate?fmtPct(stats.win_rate):'—';
-  document.getElementById('hm-pnl').textContent=stats.pnl!=null?(stats.pnl>=0?'+':'')+stats.pnl.toFixed(1)+'u':'—';
-  document.getElementById('hm-roi').textContent=stats.roi!=null?fmtEdge(stats.roi):'—';
-  document.getElementById('hm-picks').textContent=picks.length;
+  const setVal=(id,v)=>{const e=document.getElementById(id);e.textContent=v;e.classList.remove('pop');void e.offsetWidth;e.classList.add('pop');};
+  setVal('hm-wr',stats.win_rate?fmtPct(stats.win_rate):'—');
+  setVal('hm-pnl',stats.pnl!=null?(stats.pnl>=0?'+':'')+stats.pnl.toFixed(1)+'u':'—');
+  setVal('hm-roi',stats.roi!=null?fmtEdge(stats.roi):'—');
+  setVal('hm-picks',picks.length);
 
   // Best pick banner
   if(picks.length>0){
@@ -986,10 +1065,31 @@ fetch('picks_latest.json').then(r=>r.json()).then(data=>{
     });
   }
 
+  if(isRefresh)showRefreshToast();
 }).catch(err=>{
   console.error('Failed to load picks_latest.json',err);
   document.getElementById('picks-container').innerHTML='<div class="no-picks"><div class="no-picks-icon">⚠️</div><h3>資料載入失敗</h3><p>無法載入預測資料，請稍後再試。</p></div>';
-});
+  if(isRefresh)showRefreshToast('⚠ 載入失敗');
+});}
+
+function refreshData(){
+  const btn=document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  document.getElementById('picks-container').innerHTML='';
+  document.getElementById('intel-grid').innerHTML='';
+  document.getElementById('history-rows').innerHTML='';
+  loadData(true);
+  setTimeout(()=>btn.classList.remove('spinning'),1800);
+}
+
+function showRefreshToast(msg){
+  const t=document.getElementById('refresh-toast');
+  t.textContent=(msg||'✓ 資料已更新');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+loadData(false);
 </script>
 </body>
 </html>
