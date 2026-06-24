@@ -2420,7 +2420,12 @@ def get_surface_stats(key: str, surface: str, tour: str = "") -> dict:
             else:
                 default = {"svpt_won": 0.590, "rtpt_won": 0.315, "elo": 1500}
         else:
-            default = {"svpt_won": 0.610, "rtpt_won": 0.330, "elo": 1500}
+            # has_static=True but surface entry may be missing — keep tour-aware fallback
+            is_wta_player = (tour == "wta") or (key in WTA_STATS)
+            if is_wta_player:
+                default = {"svpt_won": 0.520, "rtpt_won": 0.340, "elo": 1500}
+            else:
+                default = {"svpt_won": 0.590, "rtpt_won": 0.315, "elo": 1500}
         base = dict(players.get(key, {}).get(surf, default))
 
     live_elo = _LIVE_ELO.get(key, {}).get(surf)
@@ -2642,9 +2647,9 @@ def fetch_current_rankings() -> None:
 
 def fetch_sackmann_matches(year: int = None) -> List[dict]:
     """
-    Load ATP + WTA match CSVs for last 3 historical years.
-    Reads from local downloaded files (SACKMANN_ATP/WTA_PATH env) first,
-    falls back to mikahon GitHub mirror via HTTP.
+    Load ATP + WTA match CSVs.
+    Local path: checks year, year-1 through year-4 (current/recent data when available locally).
+    HTTP mirror: only year-2 through year-4 (mikahon mirror lag is ~1-2 years).
     """
     if year is None:
         year = datetime.datetime.utcnow().year
@@ -2653,12 +2658,17 @@ def fetch_sackmann_matches(year: int = None) -> List[dict]:
         "wta": os.environ.get("SACKMANN_WTA_PATH", ""),
     }
     rows: List[dict] = []
-    # Use last 3 historical years (not current/previous which may not exist in mirror)
-    years_to_try = [year - 2, year - 3, year - 4]
-    for y in years_to_try:
+    # HTTP mirror only has data up to ~year-2; local clone may have current/recent year
+    mirror_years = [year - 2, year - 3, year - 4]
+    local_only_years = [year, year - 1]
+    years_seen: set = set()
+
+    for y in local_only_years + mirror_years:
         for tour in ("atp", "wta"):
+            if (y, tour) in years_seen:
+                continue
             fetched = False
-            # 1. Try local file
+            # 1. Try local file (any year)
             local_file = os.path.join(local_paths[tour], f"{tour}_matches_{y}.csv") if local_paths[tour] else ""
             if local_file and os.path.isfile(local_file):
                 try:
@@ -2670,8 +2680,11 @@ def fetch_sackmann_matches(year: int = None) -> List[dict]:
                 except Exception as e:
                     log.info("fetch_sackmann %s_%d local read error: %s", tour, y, e)
             if fetched:
+                years_seen.add((y, tour))
                 continue
-            # 2. Fall back to mikahon GitHub mirror
+            # 2. HTTP fallback only for mirror years
+            if y not in mirror_years:
+                continue
             url = (f"https://raw.githubusercontent.com/mikahon/tennis_{tour}"
                    f"/master/{tour}_matches_{y}.csv")
             try:
@@ -2685,7 +2698,8 @@ def fetch_sackmann_matches(year: int = None) -> List[dict]:
                     log.info("fetch_sackmann %s_%d: HTTP %d (no data for this year)", tour, y, r.status_code)
             except Exception as e:
                 log.info("fetch_sackmann %s_%d request error: %s", tour, y, e)
-    log.info("fetch_sackmann total: %d rows across %d years", len(rows), len(years_to_try))
+            years_seen.add((y, tour))
+    log.info("fetch_sackmann total: %d rows", len(rows))
     return rows
 
 
@@ -3013,12 +3027,12 @@ def predict(p1_key: str, p2_key: str, surface: str,
     raw_prob = w["elo"] * elo_p1 + w["markov"] * markov_p1 + w["hb"] * hb_p1 + w["adv"] * adv_p1
 
     fat1 = fatigue_score(
-        prof1.get("days_rest", 3),
+        prof1.get("days_rest", 7),
         float(prof1.get("last_minutes", 90)),
         int(prof1.get("last_sets", 3)),
     ) * age_fatigue_mult(p1_key)
     fat2 = fatigue_score(
-        prof2.get("days_rest", 3),
+        prof2.get("days_rest", 7),
         float(prof2.get("last_minutes", 90)),
         int(prof2.get("last_sets", 3)),
     ) * age_fatigue_mult(p2_key)
