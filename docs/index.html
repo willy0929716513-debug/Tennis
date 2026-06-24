@@ -576,10 +576,11 @@ function fmtPct(v){return(+v||0).toFixed(1)+'%'}
 function fmtEdge(v){return(v>=0?'+':'')+(+v||0).toFixed(1)+'%'}
 
 function avatarUrl(name,isBet){
-  const encoded=encodeURIComponent((name||'?').trim());
-  const bg=isBet?'051428':'0a0f1a';
-  const color=isBet?'00E5FF':'4a5a7a';
-  return`https://ui-avatars.com/api/?name=${encoded}&size=72&background=${bg}&color=${color}&bold=true&rounded=true&font-size=0.38`;
+  const inits=(name||'?').trim().split(' ').map(w=>w[0]||'').slice(0,2).join('').toUpperCase()||'?';
+  const bg=isBet?'%23051428':'%230a0f1a';
+  const color=isBet?'%2300E5FF':'%234a5a7a';
+  const svg=`<svg xmlns='http://www.w3.org/2000/svg' width='72' height='72'><circle cx='36' cy='36' r='36' fill='${bg}'/><text x='36' y='46' text-anchor='middle' font-family='Arial,sans-serif' font-size='26' font-weight='bold' fill='${color}'>${inits}</text></svg>`;
+  return 'data:image/svg+xml;charset=UTF-8,'+svg;
 }
 
 function toTaiwanTime(utc){
