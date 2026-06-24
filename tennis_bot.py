@@ -2574,7 +2574,7 @@ def fetch_current_rankings() -> None:
     }
 
     def _read_csv(local_base: str, filename: str) -> Optional[str]:
-        """Return CSV text from local file, or HTTP, or None."""
+        """Return CSV text from local file, or HTTP fallback, or None."""
         if local_base:
             fp = os.path.join(local_base, filename)
             if os.path.isfile(fp):
@@ -2583,27 +2583,26 @@ def fetch_current_rankings() -> None:
                     with open(fp, "r", encoding="utf-8") as f:
                         return f.read()
                 else:
-                    log.warning("_read_csv: %s is only %d bytes (truncated/empty), trying HTTP", filename, sz)
+                    log.info("_read_csv: %s is only %d bytes, trying HTTP fallback", filename, sz)
         tour_name = filename.split("_")[0]
-        for branch in ("master", "main"):
-            url = (f"https://raw.githubusercontent.com/JeffSackmann/tennis_{tour_name}"
-                   f"/{branch}/{filename}")
-            try:
-                rp = requests.get(url, timeout=30, headers=http_headers)
-                if rp.status_code == 200:
-                    log.info("_read_csv: fetched %s via HTTP (%d bytes)", filename, len(rp.content))
-                    return rp.text
-                else:
-                    log.warning("_read_csv: HTTP %d for %s", rp.status_code, url)
-            except Exception as exc:
-                log.warning("_read_csv: request error for %s: %s", filename, exc)
+        url = (f"https://raw.githubusercontent.com/mikahon/tennis_{tour_name}"
+               f"/master/{filename}")
+        try:
+            rp = requests.get(url, timeout=30, headers=http_headers)
+            if rp.status_code == 200:
+                log.info("_read_csv: fetched %s via HTTP (%d bytes)", filename, len(rp.content))
+                return rp.text
+            else:
+                log.info("_read_csv: HTTP %d for %s (no fallback data)", rp.status_code, url)
+        except Exception as exc:
+            log.info("_read_csv: request error for %s: %s", filename, exc)
         return None
 
     for tour in ("atp", "wta"):
         try:
             players_text = _read_csv(local_paths[tour], f"{tour}_players.csv")
             if not players_text:
-                log.warning("fetch_current_rankings: %s players CSV not found", tour)
+                log.info("fetch_current_rankings: %s players CSV not found, using static data", tour)
                 continue
             players: Dict[str, str] = {}
             for row in csv.DictReader(io.StringIO(players_text)):
@@ -2615,7 +2614,7 @@ def fetch_current_rankings() -> None:
 
             rank_text = _read_csv(local_paths[tour], f"{tour}_rankings_current.csv")
             if not rank_text:
-                log.warning("fetch_current_rankings: %s rankings CSV not found", tour)
+                log.info("fetch_current_rankings: %s rankings CSV not found, using static data", tour)
                 continue
 
             count = 0
@@ -2637,28 +2636,28 @@ def fetch_current_rankings() -> None:
                     count += 1
             log.info("fetch_current_rankings: %s → %d players (top 600)", tour, count)
         except Exception as e:
-            log.warning("fetch_current_rankings %s: %s", tour, e)
+            log.info("fetch_current_rankings %s: %s", tour, e)
 
 
 def fetch_sackmann_matches(year: int = None) -> List[dict]:
     """
-    Load ATP + WTA match CSVs for current + previous 2 years.
-    Reads from local cloned repo (SACKMANN_ATP/WTA_PATH env) first,
-    falls back to raw HTTP with GITHUB_TOKEN auth.
+    Load ATP + WTA match CSVs for last 3 historical years.
+    Reads from local downloaded files (SACKMANN_ATP/WTA_PATH env) first,
+    falls back to mikahon GitHub mirror via HTTP.
     """
     if year is None:
         year = datetime.datetime.utcnow().year
-    gh_token = os.environ.get("GITHUB_TOKEN", "")
-    req_headers: dict = {"Authorization": f"token {gh_token}"} if gh_token else {}
     local_paths = {
         "atp": os.environ.get("SACKMANN_ATP_PATH", ""),
         "wta": os.environ.get("SACKMANN_WTA_PATH", ""),
     }
     rows: List[dict] = []
-    for y in [year, year - 1, year - 2]:
+    # Use last 3 historical years (not current/previous which may not exist in mirror)
+    years_to_try = [year - 2, year - 3, year - 4]
+    for y in years_to_try:
         for tour in ("atp", "wta"):
             fetched = False
-            # 1. Try local clone
+            # 1. Try local file
             local_file = os.path.join(local_paths[tour], f"{tour}_matches_{y}.csv") if local_paths[tour] else ""
             if local_file and os.path.isfile(local_file):
                 try:
@@ -2668,26 +2667,24 @@ def fetch_sackmann_matches(year: int = None) -> List[dict]:
                     log.info("fetch_sackmann: %s_%d (local) → %d rows", tour, y, len(batch))
                     fetched = True
                 except Exception as e:
-                    log.warning("fetch_sackmann %s_%d local read error: %s", tour, y, e)
+                    log.info("fetch_sackmann %s_%d local read error: %s", tour, y, e)
             if fetched:
                 continue
-            # 2. Fall back to HTTP
-            for branch in ("master", "main"):
-                url = (f"https://raw.githubusercontent.com/JeffSackmann/tennis_{tour}"
-                       f"/{branch}/{tour}_matches_{y}.csv")
-                try:
-                    r = requests.get(url, timeout=25, headers=req_headers)
-                    r.raise_for_status()
+            # 2. Fall back to mikahon GitHub mirror
+            url = (f"https://raw.githubusercontent.com/mikahon/tennis_{tour}"
+                   f"/master/{tour}_matches_{y}.csv")
+            try:
+                r = requests.get(url, timeout=25)
+                if r.status_code == 200:
                     batch = list(csv.DictReader(io.StringIO(r.text)))
                     rows.extend(batch)
-                    log.info("fetch_sackmann: %s_%d (%s) → %d rows", tour, y, branch, len(batch))
+                    log.info("fetch_sackmann: %s_%d (HTTP) → %d rows", tour, y, len(batch))
                     fetched = True
-                    break
-                except Exception as e:
-                    log.warning("fetch_sackmann %s_%d branch=%s: %s", tour, y, branch, e)
-            if not fetched:
-                log.warning("fetch_sackmann %s_%d: not found locally or via HTTP", tour, y)
-    log.info("fetch_sackmann total: %d rows across 3 years", len(rows))
+                else:
+                    log.info("fetch_sackmann %s_%d: HTTP %d (no data for this year)", tour, y, r.status_code)
+            except Exception as e:
+                log.info("fetch_sackmann %s_%d request error: %s", tour, y, e)
+    log.info("fetch_sackmann total: %d rows across %d years", len(rows), len(years_to_try))
     return rows
 
 

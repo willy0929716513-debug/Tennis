@@ -32,40 +32,30 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Download Sackmann CSV files
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download tennis CSV files
         run: |
+          BASE="https://raw.githubusercontent.com/mikahon"
           YEAR=$(date +%Y)
           for TOUR in atp wta; do
             mkdir -p /tmp/sackmann_${TOUR}
-            REPO="JeffSackmann/tennis_${TOUR}"
-            # Players and rankings (always exist)
+            # Players and rankings (always exist in mirror)
             for FILE in ${TOUR}_players.csv ${TOUR}_rankings_current.csv; do
-              HTTP=$(curl -sf \
-                -H "Authorization: Bearer $GH_TOKEN" \
-                -H "Accept: application/vnd.github.raw+json" \
-                -H "X-GitHub-Api-Version: 2022-11-28" \
-                "https://api.github.com/repos/${REPO}/contents/${FILE}" \
-                -o /tmp/sackmann_${TOUR}/${FILE} \
-                -w "%{http_code}" 2>/dev/null || echo "000")
+              HTTP=$(curl -s -w "%{http_code}" \
+                "${BASE}/tennis_${TOUR}/master/${FILE}" \
+                -o /tmp/sackmann_${TOUR}/${FILE})
               echo "${TOUR}/${FILE}: HTTP ${HTTP}"
+              [ "$HTTP" = "200" ] || rm -f /tmp/sackmann_${TOUR}/${FILE}
             done
-            # Match files for last 3 years (may not exist yet)
-            for Y in $YEAR $((YEAR-1)) $((YEAR-2)); do
+            # Match files: try last 3 historical years (year-2 to year-4)
+            for Y in $((YEAR-2)) $((YEAR-3)) $((YEAR-4)); do
               FILE="${TOUR}_matches_${Y}.csv"
-              HTTP=$(curl -sf \
-                -H "Authorization: Bearer $GH_TOKEN" \
-                -H "Accept: application/vnd.github.raw+json" \
-                -H "X-GitHub-Api-Version: 2022-11-28" \
-                "https://api.github.com/repos/${REPO}/contents/${FILE}" \
-                -o /tmp/sackmann_${TOUR}/${FILE} \
-                -w "%{http_code}" 2>/dev/null || echo "000")
+              HTTP=$(curl -s -w "%{http_code}" \
+                "${BASE}/tennis_${TOUR}/master/${FILE}" \
+                -o /tmp/sackmann_${TOUR}/${FILE})
               echo "${TOUR}/${FILE}: HTTP ${HTTP}"
+              [ "$HTTP" = "200" ] || rm -f /tmp/sackmann_${TOUR}/${FILE}
             done
           done
-          # Show what we got
           ls -lh /tmp/sackmann_atp/ /tmp/sackmann_wta/ 2>/dev/null || true
 
       - name: Run Tennis Bot
