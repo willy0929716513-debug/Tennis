@@ -58,6 +58,25 @@ jobs:
           done
           ls -lh /tmp/sackmann_atp/ /tmp/sackmann_wta/ 2>/dev/null || true
 
+      - name: Download msolonskyi ATP data (2025-2026, weekly-updated)
+        run: |
+          mkdir -p /tmp/msolonskyi_atp
+          BASE="https://raw.githubusercontent.com/msolonskyi/ManTennisData/master/atp"
+          YEAR=$(date +%Y)
+          # Tournament metadata (surface, dates) — required for schema join
+          HTTP=$(curl -s -w "%{http_code}" "${BASE}/tournaments.csv" \
+            -o /tmp/msolonskyi_atp/tournaments.csv)
+          echo "tournaments.csv: HTTP ${HTTP}"
+          [ "$HTTP" = "200" ] || rm -f /tmp/msolonskyi_atp/tournaments.csv
+          # Current year and last year matches
+          for Y in ${YEAR} $((YEAR-1)); do
+            HTTP=$(curl -s -w "%{http_code}" "${BASE}/matches_${Y}.csv" \
+              -o /tmp/msolonskyi_atp/matches_${Y}.csv)
+            echo "atp/matches_${Y}.csv: HTTP ${HTTP}"
+            [ "$HTTP" = "200" ] || rm -f /tmp/msolonskyi_atp/matches_${Y}.csv
+          done
+          ls -lh /tmp/msolonskyi_atp/ 2>/dev/null || true
+
       - name: Run Tennis Bot
         env:
           ODDS_API_KEY:    ${{ secrets.ODDS_API_KEY }}
@@ -66,8 +85,9 @@ jobs:
           GIST_ID:         ${{ secrets.GIST_ID }}
           NTFY_TOPIC:      ${{ secrets.NTFY_TOPIC }}
           GITHUB_TOKEN:    ${{ secrets.GITHUB_TOKEN }}
-          SACKMANN_ATP_PATH: /tmp/sackmann_atp
-          SACKMANN_WTA_PATH: /tmp/sackmann_wta
+          SACKMANN_ATP_PATH:    /tmp/sackmann_atp
+          SACKMANN_WTA_PATH:    /tmp/sackmann_wta
+          MSOLONSKYI_ATP_PATH:  /tmp/msolonskyi_atp
         run: python tennis_bot.py
 
       - name: Commit updated picks

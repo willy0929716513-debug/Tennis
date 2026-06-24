@@ -28,6 +28,7 @@ import os
 import sys
 from typing import Dict, List, Optional, Tuple
 
+import random
 import requests
 
 # ── 環境設定 ─────────────────────────────────────────────────────────────────
@@ -68,29 +69,30 @@ def _log_loss(probs: List[float]) -> float:
     return -sum(math.log(max(p, eps)) for p in probs) / len(probs)
 
 
-def _calibration(probs: List[float], bin_size: float = 0.05) -> List[dict]:
+def _calibration(results: List[dict], bin_size: float = 0.05) -> List[dict]:
     """
-    Group predictions into bins and show predicted vs. actual win rate.
-    Since winner is always p1, actual WR in each bin should equal bin center.
+    Proper probability calibration: when model says X%, does the player win X% of the time?
+    Each result has pred_p (probability for p1) and actual (1 if p1 wins, 0 otherwise).
+    p1/p2 assignment is randomised 50/50 so bins below and above 0.5 are both populated.
     """
-    bins: Dict[int, List[float]] = {}
-    for p in probs:
-        b = int(p / bin_size)
-        bins.setdefault(b, []).append(p)
-    result = []
+    bins: Dict[int, List[Tuple[float, int]]] = {}
+    for r in results:
+        b = int(r["pred_p"] / bin_size)
+        bins.setdefault(b, []).append((r["pred_p"], r["actual"]))
+    out = []
     for b in sorted(bins):
         lo = b * bin_size
         hi = lo + bin_size
-        vals = bins[b]
-        avg_pred   = sum(vals) / len(vals)
-        actual_wr  = sum(1 for v in vals if v > 0.5) / len(vals)  # correct direction
-        result.append({
-            "range":       f"{lo:.2f}–{hi:.2f}",
-            "count":       len(vals),
-            "avg_pred":    round(avg_pred, 3),
-            "actual_acc":  round(actual_wr * 100, 1),
+        pairs = bins[b]
+        avg_pred  = sum(p for p, _ in pairs) / len(pairs)
+        actual_wr = sum(a for _, a in pairs) / len(pairs)
+        out.append({
+            "range":      f"{lo:.2f}–{hi:.2f}",
+            "count":      len(pairs),
+            "avg_pred":   round(avg_pred, 3),
+            "actual_wr":  round(actual_wr * 100, 1),
         })
-    return result
+    return out
 
 
 # ── 主要回測邏輯 ──────────────────────────────────────────────────────────────
@@ -177,29 +179,38 @@ def run_backtest() -> dict:
 
         try:
             sport_key = "tennis_wta" if is_wta else "tennis_atp"
+            # Randomly swap p1/p2 so calibration is meaningful:
+            # half the time actual winner is p1 (actual=1), half the time p2 (actual=0).
+            swap = random.random() > 0.5
+            p1k, p2k = (lkey, wkey) if swap else (wkey, lkey)
+            actual = 0 if swap else 1   # did p1 actually win?
+
             pred = bot.predict(
-                wkey, lkey, surface,
+                p1k, p2k, surface,
                 best_of=best_of, sport_key=sport_key,
             )
-            pred_p_winner = pred["blend_p1"]   # winner is always p1
+            pred_p = pred["blend_p1"]   # P(p1 wins)
+            correct = (pred_p > 0.5) == (actual == 1)
 
-            # 從訓練資料推估市場概率 (ELO-based fair price proxy)
-            elo_w = pred.get("elo1", 1800)
-            elo_l = pred.get("elo2", 1800)
-            elo_p = bot.elo_win_prob(elo_w, elo_l)
+            # ELO-based fair price proxy (always winner vs loser for comparability)
+            pred_w = bot.predict(wkey, lkey, surface, best_of=best_of, sport_key=sport_key)
+            elo_w  = pred_w.get("elo1", 1800)
+            elo_l  = pred_w.get("elo2", 1800)
+            elo_p  = bot.elo_win_prob(elo_w, elo_l)
 
             results.append({
-                "date":    row.get("tourney_date", ""),
-                "surface": surface,
-                "winner":  wname,
-                "loser":   lname,
-                "best_of": best_of,
+                "date":     row.get("tourney_date", ""),
+                "surface":  surface,
+                "winner":   wname,
+                "loser":    lname,
+                "best_of":  best_of,
                 "tour_lvl": lvl_raw,
-                "pred_p":  round(pred_p_winner, 4),
-                "elo_p":   round(elo_p, 4),
-                "elo_w":   round(elo_w, 1),
-                "elo_l":   round(elo_l, 1),
-                "correct": pred_p_winner > 0.5,
+                "pred_p":   round(pred_p, 4),
+                "actual":   actual,
+                "elo_p":    round(elo_p, 4),
+                "elo_w":    round(elo_w, 1),
+                "elo_l":    round(elo_l, 1),
+                "correct":  correct,
             })
         except Exception as e:
             error_count += 1
@@ -274,8 +285,8 @@ def run_backtest() -> dict:
     bo5 = [r for r in results if r["best_of"] == 5]
     bo3 = [r for r in results if r["best_of"] == 3]
 
-    # 校準分析
-    calib = _calibration(probs)
+    # 校準分析 (proper calibration with randomised p1/p2 assignment)
+    calib = _calibration(results)
 
     # 7. 組合最終結果
     metrics = {
@@ -310,7 +321,7 @@ def run_backtest() -> dict:
         "calibration_bins": calib,
         "benchmarks": {
             "random_accuracy":    "50.0%",
-            "elo_only_accuracy":  round(sum(1 for r in results if r["elo_p"] > 0.5) / n * 100, 1),
+            "elo_only_accuracy":  round(sum(1 for r in results if (r["elo_p"] > 0.5) == (r["actual"] == 1)) / n * 100, 1),
             "pass_threshold":     "Accuracy ≥ 58%, Brier ≤ 0.22",
         },
     }

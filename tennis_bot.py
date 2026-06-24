@@ -1200,9 +1200,8 @@ INJURY_STREAK_PENALTY    = -0.015
 # RUNTIME CACHES
 # ─────────────────────────────────────────────────────────────────────────────
 _LIVE_ELO:          Dict[str, dict]  = {}
-_LIVE_FORM:         Dict[str, float] = {}
 _RECENT_STATS:      Dict[str, dict]  = {}
-_INJURIES:          Dict[str, str]   = {}
+_INJURIES:          set              = set()
 _SACKMANN_PROFILES: Dict[str, dict]  = {}
 _ODDS_PREV:         Dict[str, dict]  = {}  # previous run odds for movement detection
 _DYNAMIC_H2H:         Dict[Tuple[str, str, str], Tuple[int, int]] = {}  # (p1,p2,surf)→(w1,w2)
@@ -1679,7 +1678,10 @@ def return_depth_adj(p1_key: str, p2_key: str, surface: str, is_wta: bool) -> fl
     scale = 0.30 if is_wta else 0.20
     if surface == "clay":
         scale *= 1.2
-    return max(-0.030, min(0.030, (ss2 - ss1) * scale))
+    # ss1 = P1's 2nd-serve win rate, ss2 = P2's 2nd-serve win rate.
+    # P1 is advantaged when their own 2nd serve is stronger (high ss1)
+    # and when P2's 2nd serve is weaker (low ss2), so diff = ss1 - ss2.
+    return max(-0.030, min(0.030, (ss1 - ss2) * scale))
 
 
 def injury_risk_adj(p1_key: str, p2_key: str) -> float:
@@ -1733,8 +1735,12 @@ def compute_elo_from_sackmann(all_matches: List[dict]) -> None:
 
         for key in (wkey, lkey):
             if key not in elos:
-                base = float(all_db.get(key, {}).get(surf, {}).get("elo", 1500))
-                elos[key] = {"hard": base, "clay": base, "grass": base}
+                pdata = all_db.get(key, {})
+                elos[key] = {
+                    "hard":  float(pdata.get("hard",  {}).get("elo", 1500)),
+                    "clay":  float(pdata.get("clay",  {}).get("elo", 1500)),
+                    "grass": float(pdata.get("grass", {}).get("elo", 1500)),
+                }
 
         ew = elos[wkey][surf]
         el = elos[lkey][surf]
@@ -2703,6 +2709,110 @@ def fetch_sackmann_matches(year: int = None) -> List[dict]:
     return rows
 
 
+def fetch_msolonskyi_atp_matches(year: int = None) -> List[dict]:
+    """
+    Load ATP match data from msolonskyi/ManTennisData (weekly-updated, includes 2025-2026).
+    Reads from MSOLONSKYI_ATP_PATH env first, falls back to HTTP.
+    Converts to Sackmann-compatible row format for direct use in ELO/profile pipeline.
+    """
+    if year is None:
+        year = datetime.datetime.utcnow().year
+    local_base = os.environ.get("MSOLONSKYI_ATP_PATH", "")
+    base_url = "https://raw.githubusercontent.com/msolonskyi/ManTennisData/master/atp"
+
+    def _get(filename: str) -> Optional[str]:
+        if local_base:
+            fp = os.path.join(local_base, filename)
+            if os.path.isfile(fp):
+                try:
+                    with open(fp, "r", encoding="utf-8") as f:
+                        return f.read()
+                except Exception as e:
+                    log.info("fetch_msolonskyi: local read error %s: %s", filename, e)
+        url = f"{base_url}/{filename}"
+        try:
+            r = requests.get(url, timeout=30)
+            if r.status_code == 200:
+                log.info("fetch_msolonskyi: %s via HTTP (%d bytes)", filename, len(r.content))
+                return r.text
+            log.info("fetch_msolonskyi: HTTP %d for %s", r.status_code, url)
+        except Exception as e:
+            log.info("fetch_msolonskyi: request error for %s: %s", filename, e)
+        return None
+
+    # Build tournament lookup for surface/date
+    tourney_map: dict = {}
+    tourney_text = _get("tournaments.csv")
+    if not tourney_text:
+        log.info("fetch_msolonskyi: tournaments.csv unavailable — skipping ATP 2025/2026")
+        return []
+    _surf_norm = {"Hard": "hard", "Clay": "clay", "Grass": "grass", "Carpet": "carpet"}
+    _level_map = {"grand-slam": "G", "masters": "M"}
+    for t in csv.DictReader(io.StringIO(tourney_text)):
+        tid = (t.get("id") or "").strip()
+        if not tid:
+            continue
+        tourney_map[tid] = {
+            "surface":       _surf_norm.get((t.get("surface") or "Hard").strip(), "hard"),
+            "tourney_date":  (t.get("start_dtm") or "").strip(),
+            "tourney_name":  (t.get("name") or "").strip(),
+            "tourney_level": _level_map.get((t.get("series_id") or "").strip(), "A"),
+        }
+    log.info("fetch_msolonskyi: %d tournaments loaded", len(tourney_map))
+
+    rows: List[dict] = []
+    for y in (year, year - 1):
+        match_text = _get(f"matches_{y}.csv")
+        if not match_text:
+            continue
+        batch = 0
+        for mrow in csv.DictReader(io.StringIO(match_text)):
+            wname = (mrow.get("winner_name") or "").strip()
+            lname = (mrow.get("loser_name") or "").strip()
+            if not wname or not lname:
+                continue
+            tid = (mrow.get("tournament_id") or "").strip()
+            t = tourney_map.get(tid, {})
+            score = (mrow.get("match_score") or "").strip()
+            ret_flag = (mrow.get("match_ret") or "").strip()
+            if ret_flag:
+                score = (score + " " + ret_flag).strip()
+            rows.append({
+                "tourney_id":    tid,
+                "tourney_name":  t.get("tourney_name", ""),
+                "surface":       t.get("surface", "hard"),
+                "tourney_level": t.get("tourney_level", "A"),
+                "tourney_date":  t.get("tourney_date", ""),
+                "winner_name":   wname,
+                "loser_name":    lname,
+                "score":         score,
+                "round":         (mrow.get("stadie_id") or "").strip(),
+                "minutes":       (mrow.get("match_duration") or "").strip(),
+                "w_ace":         mrow.get("win_aces", ""),
+                "w_df":          mrow.get("win_double_faults", ""),
+                "w_svpt":        mrow.get("win_service_points_total", ""),
+                "w_1stIn":       mrow.get("win_first_serves_in", ""),
+                "w_1stWon":      mrow.get("win_first_serve_points_won", ""),
+                "w_2ndWon":      mrow.get("win_second_serve_points_won", ""),
+                "w_bpFaced":     mrow.get("win_break_points_serve_total", ""),
+                "w_bpSaved":     mrow.get("win_break_points_saved", ""),
+                "l_ace":         mrow.get("los_aces", ""),
+                "l_df":          mrow.get("los_double_faults", ""),
+                "l_svpt":        mrow.get("los_service_points_total", ""),
+                "l_1stIn":       mrow.get("los_first_serves_in", ""),
+                "l_1stWon":      mrow.get("los_first_serve_points_won", ""),
+                "l_2ndWon":      mrow.get("los_second_serve_points_won", ""),
+                "l_bpFaced":     mrow.get("los_break_points_serve_total", ""),
+                "l_bpSaved":     mrow.get("los_break_points_saved", ""),
+                "_source":       "msolonskyi",
+            })
+            batch += 1
+        log.info("fetch_msolonskyi: ATP %d → %d rows", y, batch)
+
+    log.info("fetch_msolonskyi total: %d ATP rows", len(rows))
+    return rows
+
+
 def build_player_profile(all_matches: List[dict], full_name: str,
                          n: int = 20) -> Optional[dict]:
     """Compute rolling serve/return/form/fatigue + advanced stats from last n matches."""
@@ -3056,6 +3166,7 @@ def predict(p1_key: str, p2_key: str, surface: str,
     style_val      = playstyle_adj(p1_key, p2_key, surface)
     surf_trans_val = surface_transition_adj(p1_key, p2_key, prof1, prof2, surface)
     ret_depth_val  = return_depth_adj(p1_key, p2_key, surface, is_wta)
+    ace_val        = ace_serve_adj(p1_key, p2_key)
     inj_val        = injury_risk_adj(p1_key, p2_key)
 
     alt_adj    = altitude_adj(tournament, surface)
@@ -3073,7 +3184,7 @@ def predict(p1_key: str, p2_key: str, surface: str,
         raw_prob + fat_adj_val + form_adj_val + h2h_val + effective_clutch
         + df_val + bh_val + streak_val + wind_val
         + bo5_val + fs_val + bp_atk_val + cond_val
-        + style_val + surf_trans_val + ret_depth_val + inj_val
+        + style_val + surf_trans_val + ret_depth_val + ace_val + inj_val
     )
 
     # v4.0: Probability calibration — regress extreme predictions toward 0.5
@@ -3791,6 +3902,11 @@ def run() -> None:
     log.info("Live ranks loaded: %d players", len(_LIVE_RANKS))
 
     all_matches_raw = fetch_sackmann_matches()
+    # Supplement with msolonskyi ATP data for 2025-2026 (weekly-updated mirror)
+    msolonskyi_raw = fetch_msolonskyi_atp_matches()
+    if msolonskyi_raw:
+        all_matches_raw = all_matches_raw + msolonskyi_raw
+        log.info("Combined match data: %d total rows (%d msolonskyi ATP)", len(all_matches_raw), len(msolonskyi_raw))
 
     load_sackmann_data(all_matches_raw)
 
