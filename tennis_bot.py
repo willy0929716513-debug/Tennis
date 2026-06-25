@@ -4019,7 +4019,7 @@ def run() -> None:
     history = load_history()
 
     now_utc = datetime.datetime.utcnow()
-    soon_picks = picks_starting_soon(picks, now_utc, hours=2.0)
+    soon_picks = picks_starting_soon(picks, now_utc, hours=3.0)
     if soon_picks:
         log.info("Recording %d picks starting within 2h to Gist", len(soon_picks))
         record_picks_to_history(soon_picks, history, now_tw)
