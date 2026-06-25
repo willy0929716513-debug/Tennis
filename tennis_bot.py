@@ -3050,7 +3050,7 @@ def load_sackmann_data(all_matches: Optional[List[dict]] = None) -> None:
                     rec["rtpt_won"] = profile["rtpt_won"]
                 _RECENT_STATS[key] = rec
             ok += 1
-    log.info("load_sackmann_data: %d/%d static players profiled", ok, len(all_players))
+    log.info("load_sackmann_data: %d/%d static players profiled", ok, len(ALL_DB))
 
     # Profile extra players (qualifiers / lower-ranked not in static list)
     extra_ok = 0
