@@ -3543,6 +3543,7 @@ def generate_picks(matches: List[dict],
             continue
 
         # 市場-模型偏差過大時向市場靠攏（防止過度信任模型）
+        raw_model_p = model_p  # preserve original for confidence check & record
         divergence = model_p - dv_p
         if divergence > 0.15:
             model_p = dv_p + 0.15
@@ -3551,8 +3552,9 @@ def generate_picks(matches: List[dict],
         if edge < eff_min_edge:
             continue
         # 草地賽事使用更高信心門檻（草地不確定性高，qualifying尤甚）
+        # Use raw_model_p so clamped picks aren't penalised twice
         surface_conf = 0.65 if m.get("surface") == "grass" else MIN_CONF_ML
-        if model_p < surface_conf:
+        if raw_model_p < surface_conf:
             continue
         if p1_key in _INJURIES or p2_key in _INJURIES:
             continue
@@ -3594,6 +3596,7 @@ def generate_picks(matches: List[dict],
             "bet_on_cn":      cn_name(bet_name),
             "best_price":     round(best_price, 3),
             "model_p":        round(model_p * 100, 1),
+            "raw_model_p":    round(raw_model_p * 100, 1),
             "dv_p":           round(dv_p * 100, 1),
             "edge":           round(edge * 100, 1),
             "conf":           round(conf * 100, 1),
