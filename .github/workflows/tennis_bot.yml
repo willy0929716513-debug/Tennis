@@ -5,10 +5,12 @@ on:
   # 澳洲/亞洲賽事 ~00:00 UTC 開賽 → 21:00 UTC（台灣 05:00）
   # 歐洲賽事     ~10:00 UTC 開賽 → 07:00 UTC（台灣 15:00）
   # 美洲賽事     ~15:00 UTC 開賽 → 12:00 UTC（台灣 20:00）
+  # 每週一 01:00 UTC（台灣 09:00）自動執行回測
   schedule:
     - cron: "0 21 * * *"   # 台灣 05:00 — 澳網/亞洲賽事前3h
     - cron: "0 7  * * *"   # 台灣 15:00 — 歐洲賽事前3h（法網/溫網）
     - cron: "0 12 * * *"   # 台灣 20:00 — 美洲賽事前3h（美網/邁阿密）
+    - cron: "0 1  * * 1"   # 台灣 週一 09:00 — 每週回測
   workflow_dispatch:
     inputs:
       run_backtest:
@@ -108,11 +110,11 @@ jobs:
           git diff --cached --quiet || git commit -m "chore: update tennis picks [skip ci]"
           git push origin HEAD:main
 
-  # 每週一 UTC 03:00 自動執行回測，或手動觸發時選擇
+  # 每週一台灣09:00自動執行回測，或手動觸發時選擇
   backtest:
     runs-on: ubuntu-latest
     if: >
-      github.event_name == 'schedule' && github.event.schedule == '0 3 * * 1' ||
+      github.event_name == 'schedule' && github.event.schedule == '0 1 * * 1' ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.run_backtest == 'true')
     permissions:
       contents: write
