@@ -53,7 +53,7 @@ MIN_BOOKS     = 3
 MAX_PICKS     = 6
 
 # v4.0 model improvements
-PROB_CALIB_ALPHA  = 0.88   # regress extreme probs toward 0.5 (over-confidence correction)
+PROB_CALIB_ALPHA  = 0.82   # regress extreme probs toward 0.5 (over-confidence correction)
 FORM_DECAY_LAMBDA = 0.12   # exponential form decay per match position
 _FORM_WEIGHTS: List[float] = [math.exp(-FORM_DECAY_LAMBDA * i) for i in range(30)]
 ELO_RECENT_MULT   = {      # K-factor recency multiplier by days ago
@@ -3174,7 +3174,7 @@ def predict(p1_key: str, p2_key: str, surface: str,
         + bo5_val + fs_val + bp_atk_val + cond_val
         + style_val + surf_trans_val + ret_depth_val + ace_val + inj_val
     )
-    blend_raw = raw_prob + max(-0.20, min(0.20, total_adj))
+    blend_raw = raw_prob + max(-0.15, min(0.15, total_adj))
 
     # v4.0: Probability calibration — regress extreme predictions toward 0.5
     # WTA gets extra dampening (α×0.96) due to higher match volatility
@@ -3538,13 +3538,23 @@ def generate_picks(matches: List[dict],
             eff_min_edge = max(eff_min_edge, 0.12)
         elif dq < 0.80:
             eff_min_edge = max(eff_min_edge, 0.09)
-        # 市場機率底線：市場認為我們推薦的選手勝率 < 33% → 模型可能誤判，跳過
-        if dv_p < 0.33:
+        # 市場機率底線：市場認為我們推薦的選手勝率 < 45% → 模型可能誤判，跳過
+        if dv_p < 0.45:
             continue
+
+        # 市場-模型偏差過大時向市場靠攏（防止過度信任模型）
+        raw_model_p = model_p  # preserve original for confidence check & record
+        divergence = model_p - dv_p
+        if divergence > 0.15:
+            model_p = dv_p + 0.15
+            edge = model_p - dv_p
 
         if edge < eff_min_edge:
             continue
-        if model_p < MIN_CONF_ML:
+        # 草地賽事使用更高信心門檻（草地不確定性高，qualifying尤甚）
+        # Use raw_model_p so clamped picks aren't penalised twice
+        surface_conf = 0.65 if m.get("surface") == "grass" else MIN_CONF_ML
+        if raw_model_p < surface_conf:
             continue
         if p1_key in _INJURIES or p2_key in _INJURIES:
             continue
@@ -3586,6 +3596,7 @@ def generate_picks(matches: List[dict],
             "bet_on_cn":      cn_name(bet_name),
             "best_price":     round(best_price, 3),
             "model_p":        round(model_p * 100, 1),
+            "raw_model_p":    round(raw_model_p * 100, 1),
             "dv_p":           round(dv_p * 100, 1),
             "edge":           round(edge * 100, 1),
             "conf":           round(conf * 100, 1),
