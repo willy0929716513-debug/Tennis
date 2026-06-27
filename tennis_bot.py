@@ -3715,9 +3715,11 @@ def save_history(hist: dict) -> None:
 
 
 def picks_starting_soon(picks: List[dict], now_utc: datetime.datetime,
-                         hours: float = 2.0) -> List[dict]:
-    """Return picks whose match commence time is within `hours` from now (UTC)
-    AND whose match date is today in Taiwan time (UTC+8)."""
+                         hours: float = 5.0, after_hours: float = 1.5) -> List[dict]:
+    """Return picks within the record window:
+    - match starts within `hours` from now (pre-game), OR
+    - match started up to `after_hours` ago (just kicked off).
+    Match date must be today in Taiwan time (UTC+8)."""
     now_tw_date = (now_utc + datetime.timedelta(hours=8)).date()
     result = []
     for p in picks:
@@ -3729,7 +3731,7 @@ def picks_starting_soon(picks: List[dict], now_utc: datetime.datetime,
             mt_naive = mt.replace(tzinfo=None) if mt.tzinfo else mt
             diff_h = (mt_naive - now_utc).total_seconds() / 3600.0
             mt_tw_date = (mt_naive + datetime.timedelta(hours=8)).date()
-            if 0.0 <= diff_h <= hours and mt_tw_date == now_tw_date:
+            if -after_hours <= diff_h <= hours and mt_tw_date == now_tw_date:
                 result.append(p)
         except Exception:
             pass
@@ -4019,9 +4021,9 @@ def run() -> None:
     history = load_history()
 
     now_utc = datetime.datetime.utcnow()
-    soon_picks = picks_starting_soon(picks, now_utc, hours=3.0)
+    soon_picks = picks_starting_soon(picks, now_utc, hours=5.0, after_hours=1.5)
     if soon_picks:
-        log.info("Recording %d picks starting within 2h to Gist", len(soon_picks))
+        log.info("Recording %d picks (within 5h before / 1.5h after kickoff)", len(soon_picks))
         record_picks_to_history(soon_picks, history, now_tw)
         save_history(history)
     else:
