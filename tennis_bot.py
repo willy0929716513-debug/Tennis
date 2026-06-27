@@ -4038,7 +4038,7 @@ def run() -> None:
         record_picks_to_history(soon_picks, history, now_tw)
         save_history(history)
     else:
-        log.info("No picks starting within 2h — skip Gist write")
+        log.info("No picks within record window (5h before / 1.5h after kickoff) — skip history write")
 
     stats   = compute_stats(history)
     write_json(picks, stats, history, game_preds, now_tw)
