@@ -780,7 +780,7 @@ function avatarUrl(name,isBet){
 function iocToFlag(ioc){
   const m={'SRB':'RS','ESP':'ES','ITA':'IT','USA':'US','AUS':'AU','GBR':'GB','SCO':'GB','WAL':'GB','GER':'DE','FRA':'FR','RUS':'RU','BEL':'BE','CZE':'CZ','POL':'PL','ARG':'AR','BRA':'BR','JPN':'JP','CHN':'CN','CAN':'CA','SUI':'CH','NED':'NL','DEN':'DK','NOR':'NO','SWE':'SE','FIN':'FI','GRE':'GR','CRO':'HR','SVK':'SK','HUN':'HU','ROU':'RO','BUL':'BG','UKR':'UA','KAZ':'KZ','BLR':'BY','MDA':'MD','GEO':'GE','AUT':'AT','POR':'PT','NZL':'NZ','TPE':'TW','KOR':'KR','THA':'TH','PHI':'PH','MAS':'MY','IND':'IN','RSA':'ZA','TUN':'TN','MAR':'MA','CHI':'CL','COL':'CO','MEX':'MX','EST':'EE','LAT':'LV','LTU':'LT','ISR':'IL','ARM':'AM','AZE':'AZ','UZB':'UZ','ECU':'EC','URU':'UY','PAR':'PY','SLO':'SI','ALG':'DZ','EGY':'EG','CYP':'CY','LUX':'LU','MON':'MC','BOL':'BO','VEN':'VE','PER':'PE','DOM':'DO','SRN':'SR','BAH':'BS','HAI':'HT'};
   const iso=m[ioc];if(!iso)return'';
-  return Array.from(iso).map(c=>String.fromCodePoint(0x1F1E0+c.charCodeAt(0)-65)).join('');
+  return Array.from(iso).map(c=>String.fromCodePoint(0x1F1E6+c.charCodeAt(0)-65)).join('');
 }
 
 const TOURN_CN={
@@ -1026,7 +1026,7 @@ function loadData(isRefresh){
       chartData.wr.push(cumTotal>0?+(100*cumWins/cumTotal).toFixed(1):0);
       chartData.edge.push(+(h.edge||0).toFixed(2));
     });
-    buildChart('pnl');
+    try{buildChart('pnl');}catch(e){console.warn('Chart unavailable:',e.message);}
   }
 
   // Ticker
