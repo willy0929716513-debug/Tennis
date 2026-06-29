@@ -3655,6 +3655,9 @@ def generate_picks(matches: List[dict],
             "inj_adj":         round(pred.get("inj_adj", 0.0) * 100, 2),
             "public_bias_adj": round(bias_adj * 100, 2),
             "opening_dv_p":    round(dv_p * 100, 1),  # CLV tracking
+            "p1_country":      ALL_DB.get(p1_key, {}).get("country", ""),
+            "p2_country":      ALL_DB.get(p2_key, {}).get("country", ""),
+            "is_value":        best_price >= 2.20,
         })
         log.info("  PICK %s %s vs %s -> %s @%.2f model=%.1f%% edge=+%.1f%% $%.0f",
                  star, odds_info["home"], odds_info["away"],
