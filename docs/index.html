@@ -313,6 +313,19 @@ section{position:relative;z-index:10;padding:80px 40px}
 .hist-tab.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.08)}
 .hist-count{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;font-size:.55rem;font-weight:900;margin-left:5px;background:rgba(255,255,255,.1)}
 
+/* ── VALUE BADGE & FLAGS ── */
+.value-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;background:linear-gradient(135deg,rgba(255,140,0,.18),rgba(255,60,0,.06));border:1px solid rgba(255,140,0,.4);color:#FF8C00;font-size:.58rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;vertical-align:middle;margin-left:6px}
+.pc-flag{font-size:.88rem;line-height:1;margin-right:4px;opacity:.9}
+.picks-sub-filters{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.psf-btn{padding:6px 16px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.68rem;font-weight:600;letter-spacing:1px;cursor:pointer;transition:.15s;text-transform:uppercase}
+.psf-btn:hover{color:var(--text)}
+.psf-btn.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.08)}
+.psf-btn.val-active{border-color:#FF8C00;color:#FF8C00;background:rgba(255,140,0,.08)}
+.value-divider{display:flex;align-items:center;gap:12px;padding:28px 0 16px;margin-top:8px}
+.value-divider-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(255,140,0,.4),transparent)}
+.value-divider-line.r{background:linear-gradient(270deg,rgba(255,140,0,.4),transparent)}
+.value-divider-label{font-size:.6rem;letter-spacing:3px;text-transform:uppercase;color:#FF8C00;font-weight:700;white-space:nowrap;flex-shrink:0}
+
 /* ── TAB NAVIGATION ── */
 .main-tabs{position:sticky;top:60px;z-index:99;background:rgba(5,8,22,.96);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);padding:0 40px;display:flex;gap:0;overflow-x:auto}
 .main-tabs::-webkit-scrollbar{display:none}
@@ -550,6 +563,10 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;back
       <h2 class="section-title">今日選注</h2>
       <p class="section-sub" id="picks-sub">模型優勢即時計算更新</p>
     </div>
+    <div class="picks-sub-filters reveal" id="picks-filters" style="display:none">
+      <button class="psf-btn active" data-pf="all">全部<span id="pf-all-count" style="margin-left:5px;opacity:.6">0</span></button>
+      <button class="psf-btn" data-pf="value" id="pf-value-btn">💎 高賠率<span id="pf-value-count" style="margin-left:5px;opacity:.6">0</span></button>
+    </div>
     <div id="picks-container"></div>
   </div>
 </section>
@@ -758,6 +775,12 @@ function avatarUrl(name,isBet){
   const color=isBet?'#00E5FF':'#4a5a7a';
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72"><circle cx="36" cy="36" r="36" fill="${bg}"/><text x="36" y="46" text-anchor="middle" font-family="Arial,sans-serif" font-size="26" font-weight="bold" fill="${color}">${inits}</text></svg>`;
   return 'data:image/svg+xml;base64,'+btoa(svg);
+}
+
+function iocToFlag(ioc){
+  const m={'SRB':'RS','ESP':'ES','ITA':'IT','USA':'US','AUS':'AU','GBR':'GB','SCO':'GB','WAL':'GB','GER':'DE','FRA':'FR','RUS':'RU','BEL':'BE','CZE':'CZ','POL':'PL','ARG':'AR','BRA':'BR','JPN':'JP','CHN':'CN','CAN':'CA','SUI':'CH','NED':'NL','DEN':'DK','NOR':'NO','SWE':'SE','FIN':'FI','GRE':'GR','CRO':'HR','SVK':'SK','HUN':'HU','ROU':'RO','BUL':'BG','UKR':'UA','KAZ':'KZ','BLR':'BY','MDA':'MD','GEO':'GE','AUT':'AT','POR':'PT','NZL':'NZ','TPE':'TW','KOR':'KR','THA':'TH','PHI':'PH','MAS':'MY','IND':'IN','RSA':'ZA','TUN':'TN','MAR':'MA','CHI':'CL','COL':'CO','MEX':'MX','EST':'EE','LAT':'LV','LTU':'LT','ISR':'IL','ARM':'AM','AZE':'AZ','UZB':'UZ','ECU':'EC','URU':'UY','PAR':'PY','SLO':'SI','ALG':'DZ','EGY':'EG','CYP':'CY','LUX':'LU','MON':'MC','BOL':'BO','VEN':'VE','PER':'PE','DOM':'DO','SRN':'SR','BAH':'BS','HAI':'HT'};
+  const iso=m[ioc];if(!iso)return'';
+  return Array.from(iso).map(c=>String.fromCodePoint(0x1F1E0+c.charCodeAt(0)-65)).join('');
 }
 
 const TOURN_CN={
@@ -1022,100 +1045,147 @@ function loadData(isRefresh){
   // ── PICKS SECTION ──
   const picksContainer=document.getElementById('picks-container');
   document.getElementById('picks-sub').textContent=`今日 ${picks.length} 注推薦 · ${data.date||'今天'}`;
-  if(picks.length===0){
-    picksContainer.innerHTML=`<div class="no-picks"><div class="no-picks-icon">🔍</div><h3>今日暫無推薦選注</h3><p>模型需最低優勢門檻，所有比賽已篩選，未發現符合條件的機會。</p></div>`;
-  } else {
-    const grid=document.createElement('div');grid.className='picks-grid';
-    picks.forEach((p,idx)=>{
-      const tier=p.tier||'C';
-      const isBetHome=p.bet_on===p.p1;
-      const betPlayer=p.bet_on||p.p1||'—';
-      const oppPlayer=isBetHome?(p.p2||'—'):(p.p1||'—');
-      const betCn=isBetHome?(p.p1_cn||''):(p.p2_cn||'');
-      const oppCn=isBetHome?(p.p2_cn||''):(p.p1_cn||'');
-      const betElo=isBetHome?p.elo1:p.elo2;
-      const oppElo=isBetHome?p.elo2:p.elo1;
-      const betSv=isBetHome?p.p1_sv_pct:p.p2_sv_pct;
-      const oppSv=isBetHome?p.p2_sv_pct:p.p1_sv_pct;
-      const modelP=+(p.model_p||50);
-      const dvP=+(p.dv_p||50);
-      const edge=+(p.edge||0);
-      const surf=p.surface||'hard';
-      const commenceUTC=p.commence||'';
-      const twTime=toTaiwanTime(commenceUTC);
-      const cdText=getCountdown(commenceUTC);
-      const tourKey=(p.tournament||'').toLowerCase().replace(/-/g,'_');
-      const tourName=p.tournament?p.tournament.charAt(0).toUpperCase()+p.tournament.slice(1):'';
-      const tourLevel=p.sport_title||p.tour||'';
-      const tourCn=TOURN_CN[tourKey]||'';
-      const eloHiBet=betElo&&oppElo&&betElo>oppElo;
 
-      const card=document.createElement('div');
-      card.className=`pick-card tier-${tier} reveal`;
-      card.innerHTML=`
-        <div class="pc-header">
-          <div class="pc-header-left">
-            <span class="tier-badge ${tier}">${tierLabel(tier)}</span>
-            <span class="surface-chip ${surfClass(surf)}">${surfLabel(surf)}</span>
-          </div>
-          <div class="pc-header-right">
-            ${commenceUTC?`<span class="pc-time">${twTime} TST</span>`:''}
-            ${commenceUTC?`<span class="pc-countdown ${cdText==='started'?'started':''}" data-commence="${commenceUTC}">${cdText==='started'?'進行中':cdText}</span>`:''}
+  function buildPickCard(p){
+    const tier=p.tier||'C';
+    const isBetHome=p.bet_on===p.p1;
+    const betPlayer=p.bet_on||p.p1||'—';
+    const betCn=isBetHome?(p.p1_cn||''):(p.p2_cn||'');
+    const betElo=isBetHome?p.elo1:p.elo2;
+    const oppElo=isBetHome?p.elo2:p.elo1;
+    const modelP=+(p.model_p||50);
+    const dvP=+(p.dv_p||50);
+    const edge=+(p.edge||0);
+    const surf=p.surface||'hard';
+    const commenceUTC=p.commence||'';
+    const twTime=toTaiwanTime(commenceUTC);
+    const cdText=getCountdown(commenceUTC);
+    const tourKey=(p.tournament||'').toLowerCase().replace(/-/g,'_');
+    const tourName=p.tournament?p.tournament.charAt(0).toUpperCase()+p.tournament.slice(1):'';
+    const tourLevel=p.sport_title||p.tour||'';
+    const tourCn=TOURN_CN[tourKey]||'';
+    const eloHiBet=betElo&&oppElo&&betElo>oppElo;
+    const isValue=p.is_value===true;
+    const f1=iocToFlag(p.p1_country||'');
+    const f2=iocToFlag(p.p2_country||'');
+    const card=document.createElement('div');
+    card.className=`pick-card tier-${tier} reveal${isValue?' value-pick':''}`;
+    card.innerHTML=`
+      <div class="pc-header">
+        <div class="pc-header-left">
+          <span class="tier-badge ${tier}">${tierLabel(tier)}</span>
+          <span class="surface-chip ${surfClass(surf)}">${surfLabel(surf)}</span>
+          ${isValue?`<span class="value-badge">💎 高賠率</span>`:''}
+        </div>
+        <div class="pc-header-right">
+          ${commenceUTC?`<span class="pc-time">${twTime} TST</span>`:''}
+          ${commenceUTC?`<span class="pc-countdown ${cdText==='started'?'started':''}" data-commence="${commenceUTC}">${cdText==='started'?'進行中':cdText}</span>`:''}
+        </div>
+      </div>
+      ${tourLevel?`<div class="pc-tournament">${tourLevel}${tourName?' · '+tourName:''}</div>${tourCn?`<div class="pc-tourCn">${tourCn}</div>`:''}`:''}
+      <div class="pc-players">
+        <div class="pc-player${isBetHome?' bet-side':''}">
+          <img class="pc-photo ${isBetHome?'bet-photo':'opp-photo'}" src="${avatarUrl(p.p1||'?',isBetHome)}" alt="${p.p1||''}">
+          <div class="pc-pname">${f1?`<span class="pc-flag">${f1}</span>`:''}${p.p1||'—'}</div>
+          ${p.p1_cn?`<div class="pc-pcn">${p.p1_cn}</div>`:''}
+          <div class="pc-pstats">
+            ${p.elo1!=null?`<div class="pc-stat"><span class="pc-stat-val${isBetHome&&eloHiBet?' elo-hi':''}">${Math.round(p.elo1)}</span><span>ELO</span></div>`:''}
+            ${p.p1_sv_pct!=null?`<div class="pc-stat"><span class="pc-stat-val">${(+p.p1_sv_pct).toFixed(1)}%</span><span>發球</span></div>`:''}
           </div>
         </div>
-        ${tourLevel?`<div class="pc-tournament">${tourLevel}${tourName?' · '+tourName:''}</div>${tourCn?`<div class="pc-tourCn">${tourCn}</div>`:''}`:''}
-        <div class="pc-players">
-          <div class="pc-player${isBetHome?' bet-side':''}">
-            <img class="pc-photo ${isBetHome?'bet-photo':'opp-photo'}" src="${avatarUrl(p.p1||'?',isBetHome)}" alt="${p.p1||''}">
-            <div class="pc-pname">${p.p1||'—'}</div>
-            ${p.p1_cn?`<div class="pc-pcn">${p.p1_cn}</div>`:''}
-            <div class="pc-pstats">
-              ${p.elo1!=null?`<div class="pc-stat"><span class="pc-stat-val${isBetHome&&eloHiBet?' elo-hi':''}">${Math.round(p.elo1)}</span><span>ELO</span></div>`:''}
-              ${p.p1_sv_pct!=null?`<div class="pc-stat"><span class="pc-stat-val">${(+p.p1_sv_pct).toFixed(1)}%</span><span>發球</span></div>`:''}
-            </div>
-          </div>
-          <div class="pc-vs-col">
-            <span class="pc-vs">vs</span>
-            <div class="pc-bet-arrow">${isBetHome?'← 押':'押 →'}</div>
-          </div>
-          <div class="pc-player${!isBetHome?' bet-side':''}">
-            <img class="pc-photo ${!isBetHome?'bet-photo':'opp-photo'}" src="${avatarUrl(p.p2||'?',!isBetHome)}" alt="${p.p2||''}">
-            <div class="pc-pname">${p.p2||'—'}</div>
-            ${p.p2_cn?`<div class="pc-pcn">${p.p2_cn}</div>`:''}
-            <div class="pc-pstats">
-              ${p.elo2!=null?`<div class="pc-stat"><span class="pc-stat-val${!isBetHome&&!eloHiBet?' elo-hi':''}">${Math.round(p.elo2)}</span><span>ELO</span></div>`:''}
-              ${p.p2_sv_pct!=null?`<div class="pc-stat"><span class="pc-stat-val">${(+p.p2_sv_pct).toFixed(1)}%</span><span>發球</span></div>`:''}
-            </div>
+        <div class="pc-vs-col">
+          <span class="pc-vs">vs</span>
+          <div class="pc-bet-arrow">${isBetHome?'← 押':'押 →'}</div>
+        </div>
+        <div class="pc-player${!isBetHome?' bet-side':''}">
+          <img class="pc-photo ${!isBetHome?'bet-photo':'opp-photo'}" src="${avatarUrl(p.p2||'?',!isBetHome)}" alt="${p.p2||''}">
+          <div class="pc-pname">${f2?`<span class="pc-flag">${f2}</span>`:''}${p.p2||'—'}</div>
+          ${p.p2_cn?`<div class="pc-pcn">${p.p2_cn}</div>`:''}
+          <div class="pc-pstats">
+            ${p.elo2!=null?`<div class="pc-stat"><span class="pc-stat-val${!isBetHome&&!eloHiBet?' elo-hi':''}">${Math.round(p.elo2)}</span><span>ELO</span></div>`:''}
+            ${p.p2_sv_pct!=null?`<div class="pc-stat"><span class="pc-stat-val">${(+p.p2_sv_pct).toFixed(1)}%</span><span>發球</span></div>`:''}
           </div>
         </div>
-        <div class="pc-probs">
-          <div class="pc-prob-row">
-            <span class="pc-prob-label">模型</span>
-            <div class="pc-prob-bar"><div class="pc-prob-fill fill-model" style="width:${modelP}%"></div></div>
-            <span class="pc-prob-val" style="color:var(--cyan)">${fmtPct(modelP)}</span>
-          </div>
-          <div class="pc-prob-row">
-            <span class="pc-prob-label">市場</span>
-            <div class="pc-prob-bar"><div class="pc-prob-fill fill-market" style="width:${dvP}%"></div></div>
-            <span class="pc-prob-val" style="color:var(--gold)">${fmtPct(dvP)}</span>
-          </div>
-          <span class="pc-edge-tag${edge>=15?' edge-hi':''}">優勢 ${fmtEdge(edge)}</span>
+      </div>
+      <div class="pc-probs">
+        <div class="pc-prob-row">
+          <span class="pc-prob-label">模型</span>
+          <div class="pc-prob-bar"><div class="pc-prob-fill fill-model" style="width:${modelP}%"></div></div>
+          <span class="pc-prob-val" style="color:var(--cyan)">${fmtPct(modelP)}</span>
         </div>
-        <div class="pc-metrics">
-          <div class="pm-item"><div class="pm-label">Kelly 投注</div><div class="pm-val cyan">${(p.stake||0).toFixed(1)}u</div></div>
-          <div class="pm-item"><div class="pm-label">賠率</div><div class="pm-val gold">${(p.best_price||p.price||0).toFixed(2)}</div></div>
-          <div class="pm-item"><div class="pm-label">模型信心</div><div class="pm-val green">${fmtPct(p.conf||0)}</div></div>
-          <div class="pm-item"><div class="pm-label">書商數量</div><div class="pm-val">${p.n_books||'—'}</div></div>
+        <div class="pc-prob-row">
+          <span class="pc-prob-label">市場</span>
+          <div class="pc-prob-bar"><div class="pc-prob-fill fill-market" style="width:${dvP}%"></div></div>
+          <span class="pc-prob-val" style="color:var(--gold)">${fmtPct(dvP)}</span>
         </div>
-        <div class="pc-bet-footer">
-          <span class="pc-bet-label">押注</span>
-          <span class="pc-bet-name">${betPlayer}${betCn?' · '+betCn:''}</span>
-          <span class="pc-bet-odds">@${(p.best_price||p.price||0).toFixed(2)}</span>
-        </div>
-      `;
-      grid.appendChild(card);observer.observe(card);
-    });
-    picksContainer.appendChild(grid);
+        <span class="pc-edge-tag${edge>=15?' edge-hi':''}">優勢 ${fmtEdge(edge)}</span>
+      </div>
+      <div class="pc-metrics">
+        <div class="pm-item"><div class="pm-label">Kelly 投注</div><div class="pm-val cyan">${(p.stake||0).toFixed(1)}u</div></div>
+        <div class="pm-item"><div class="pm-label">賠率</div><div class="pm-val gold${isValue?' value-odds':''}">${(p.best_price||p.price||0).toFixed(2)}</div></div>
+        <div class="pm-item"><div class="pm-label">模型信心</div><div class="pm-val green">${fmtPct(p.conf||0)}</div></div>
+        <div class="pm-item"><div class="pm-label">書商數量</div><div class="pm-val">${p.n_books||'—'}</div></div>
+      </div>
+      <div class="pc-bet-footer">
+        <span class="pc-bet-label">押注</span>
+        <span class="pc-bet-name">${betPlayer}${betCn?' · '+betCn:''}</span>
+        <span class="pc-bet-odds">@${(p.best_price||p.price||0).toFixed(2)}</span>
+      </div>
+    `;
+    return card;
+  }
+
+  const normalPicks=picks.filter(p=>!p.is_value);
+  const valuePicks=picks.filter(p=>p.is_value===true);
+  let picksFilter='all';
+
+  function renderPicksSection(){
+    picksContainer.innerHTML='';
+    const toShow=picksFilter==='value'?valuePicks:picks;
+    if(toShow.length===0){
+      picksContainer.innerHTML=`<div class="no-picks"><div class="no-picks-icon">🔍</div><h3>${picksFilter==='value'?'目前無高賠率推薦':'今日暫無推薦選注'}</h3><p>模型需最低優勢門檻，所有比賽已篩選，未發現符合條件的機會。</p></div>`;
+      return;
+    }
+    if(picksFilter==='all'&&valuePicks.length>0&&normalPicks.length>0){
+      // 一般推薦
+      const g1=document.createElement('div');g1.className='picks-grid';
+      normalPicks.forEach(p=>{const c=buildPickCard(p);g1.appendChild(c);observer.observe(c);});
+      picksContainer.appendChild(g1);
+      // 高賠率分隔線
+      const divEl=document.createElement('div');
+      divEl.className='value-divider reveal';
+      divEl.innerHTML=`<div class="value-divider-line"></div><div class="value-divider-label">💎 高賠率機會（市場低估）</div><div class="value-divider-line r"></div>`;
+      picksContainer.appendChild(divEl);observer.observe(divEl);
+      // 高賠率推薦
+      const g2=document.createElement('div');g2.className='picks-grid';
+      valuePicks.forEach(p=>{const c=buildPickCard(p);g2.appendChild(c);observer.observe(c);});
+      picksContainer.appendChild(g2);
+    } else {
+      const grid=document.createElement('div');grid.className='picks-grid';
+      toShow.forEach(p=>{const c=buildPickCard(p);grid.appendChild(c);observer.observe(c);});
+      picksContainer.appendChild(grid);
+    }
+  }
+
+  // 顯示篩選器（有推薦時才顯示）
+  if(picks.length>0){
+    const filtersEl=document.getElementById('picks-filters');
+    if(filtersEl){
+      filtersEl.style.display='flex';
+      document.getElementById('pf-all-count').textContent=picks.length;
+      document.getElementById('pf-value-count').textContent=valuePicks.length;
+      document.querySelectorAll('.psf-btn').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          document.querySelectorAll('.psf-btn').forEach(b=>{b.classList.remove('active','val-active');});
+          picksFilter=btn.dataset.pf;
+          btn.classList.add(picksFilter==='value'?'val-active':'active');
+          renderPicksSection();
+        });
+      });
+    }
+    renderPicksSection();
+  } else {
+    picksContainer.innerHTML=`<div class="no-picks"><div class="no-picks-icon">🔍</div><h3>今日暫無推薦選注</h3><p>模型需最低優勢門檻，所有比賽已篩選，未發現符合條件的機會。</p></div>`;
   }
 
   // ── INTEL GRID ──
