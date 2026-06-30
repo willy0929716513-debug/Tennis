@@ -465,6 +465,48 @@
       "result": "P",
       "opening_dv_p": 51.3,
       "model_p": 66.3
+    },
+    {
+      "date": "2026-06-30",
+      "p1": "Alexander Blockx",
+      "p2": "Alexander Zverev",
+      "p1_cn": "布洛克斯",
+      "p2_cn": "茲韋列夫",
+      "bet_on": "Alexander Zverev",
+      "bet_on_cn": "茲韋列夫",
+      "price": 1.13,
+      "stake": 50.0,
+      "edge": 15.0,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "ATP",
+      "commence": "2026-06-30T14:30:00Z",
+      "recorded_at": "2026-06-30T12:11:57Z",
+      "result": "P",
+      "opening_dv_p": 54.9,
+      "model_p": 69.9
+    },
+    {
+      "date": "2026-06-30",
+      "p1": "Frances Tiafoe",
+      "p2": "Terence Atmane",
+      "p1_cn": "蒂亞福",
+      "p2_cn": "阿特曼",
+      "bet_on": "Frances Tiafoe",
+      "bet_on_cn": "蒂亞福",
+      "price": 1.26,
+      "stake": 50.0,
+      "edge": 15.0,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "ATP",
+      "commence": "2026-06-30T15:10:00Z",
+      "recorded_at": "2026-06-30T12:11:57Z",
+      "result": "P",
+      "opening_dv_p": 53.1,
+      "model_p": 68.2
     }
   ]
 }
