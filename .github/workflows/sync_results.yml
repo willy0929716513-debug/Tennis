@@ -1,0 +1,135 @@
+name: Sync Results from Gist
+
+on:
+  # 每2小時同步一次（台灣時間 02:00 / 04:00 / 06:00 / ... / 24:00）
+  schedule:
+    - cron: "0 */2 * * *"
+  # 手動觸發（可選擇是否強制覆蓋整份 history）
+  workflow_dispatch:
+    inputs:
+      force_overwrite:
+        description: "Force overwrite entire history.json from Gist?"
+        required: false
+        default: "false"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install requests
+        run: pip install requests -q
+
+      - name: Sync Gist results → history.json
+        env:
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GIST_ID:    ${{ secrets.GIST_ID }}
+          FORCE_OVERWRITE: ${{ github.event.inputs.force_overwrite || 'false' }}
+        run: |
+          python3 - <<'PYEOF'
+          import json, os, sys, requests
+
+          gist_token = os.environ.get("GIST_TOKEN", "")
+          gist_id    = os.environ.get("GIST_ID", "")
+          force      = os.environ.get("FORCE_OVERWRITE", "false").lower() == "true"
+
+          if not gist_token or not gist_id:
+              print("GIST_TOKEN / GIST_ID not set — skipping")
+              sys.exit(0)
+
+          # ── 1. 讀取 Gist ──────────────────────────────────────────────
+          r = requests.get(
+              f"https://api.github.com/gists/{gist_id}",
+              headers={"Authorization": f"token {gist_token}"},
+              timeout=15,
+          )
+          r.raise_for_status()
+          gist_files = r.json().get("files", {})
+
+          gist_hist = None
+          for fname, fd in gist_files.items():
+              if fname.endswith(".json"):
+                  try:
+                      gist_hist = json.loads(fd.get("content", "{}"))
+                      print(f"Loaded Gist file: {fname}  ({len(gist_hist.get('bets',[]))} bets)")
+                      break
+                  except json.JSONDecodeError:
+                      pass
+
+          if gist_hist is None:
+              print("No valid JSON found in Gist — skipping")
+              sys.exit(0)
+
+          # ── 2. 強制覆蓋模式：直接用 Gist 取代 history.json ───────────
+          if force:
+              with open("docs/history.json", "w", encoding="utf-8") as f:
+                  json.dump(gist_hist, f, ensure_ascii=False, indent=2)
+              print(f"Force-overwrote docs/history.json with {len(gist_hist.get('bets',[]))} bets")
+              sys.exit(0)
+
+          # ── 3. 合併模式：只更新 repo 裡「待結算（P）」的結果 ──────────
+          HIST_PATH = "docs/history.json"
+          if not os.path.exists(HIST_PATH):
+              # repo 裡還沒有 history，直接用 Gist 的
+              with open(HIST_PATH, "w", encoding="utf-8") as f:
+                  json.dump(gist_hist, f, ensure_ascii=False, indent=2)
+              print("Created docs/history.json from Gist (first run)")
+              sys.exit(0)
+
+          with open(HIST_PATH, encoding="utf-8") as f:
+              repo_hist = json.load(f)
+
+          # 用 (commence + bet_on) 作為唯一鍵比對
+          gist_map = {
+              (b.get("commence","") + "|" + b.get("bet_on","")): b
+              for b in gist_hist.get("bets", [])
+          }
+
+          changed = 0
+          for bet in repo_hist.get("bets", []):
+              if bet.get("result") != "P":
+                  continue  # 已結算不動它
+              key = bet.get("commence","") + "|" + bet.get("bet_on","")
+              gist_bet = gist_map.get(key)
+              if gist_bet is None:
+                  continue
+              gist_result = gist_bet.get("result","P")
+              if gist_result in ("W","L","win","loss","push","W/O"):
+                  # 標準化
+                  norm = {"win":"W","loss":"L","W":"W","L":"L","push":"push","W/O":"W/O"}
+                  bet["result"] = norm.get(gist_result, gist_result)
+                  # 若 Gist 有 close_price（實際結算賠率），也一起帶回來
+                  if gist_bet.get("close_price"):
+                      bet["close_price"] = gist_bet["close_price"]
+                  changed += 1
+                  print(f"  Updated: {bet['bet_on']} {bet.get('date','')} → {bet['result']}")
+
+          if changed:
+              with open(HIST_PATH, "w", encoding="utf-8") as f:
+                  json.dump(repo_hist, f, ensure_ascii=False, indent=2)
+              print(f"Merged {changed} result(s) from Gist into history.json")
+          else:
+              print("No pending bets found with Gist results — nothing to update")
+          PYEOF
+
+      - name: Commit if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/history.json 2>/dev/null || true
+          git diff --cached --quiet \
+            && echo "Nothing changed — skip commit" \
+            || git commit -m "chore: sync bet results from Gist [skip ci]"
+          git diff HEAD~1..HEAD --stat 2>/dev/null || true
+          git push origin HEAD:main || echo "Nothing to push"
