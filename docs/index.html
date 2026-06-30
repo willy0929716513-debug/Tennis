@@ -265,11 +265,17 @@ section{position:relative;z-index:10;padding:80px 40px}
 .hr-match{font-size:.8rem;font-weight:600}
 .hr-bet{font-size:.78rem;color:var(--text)}
 .hr-val{font-size:.78rem;color:var(--muted);font-family:'SF Mono',monospace}
-.result-badge{font-size:.6rem;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:1px;text-transform:uppercase}
-.rb-win{background:rgba(0,255,136,.15);color:var(--green);border:1px solid rgba(0,255,136,.25)}
-.rb-loss{background:rgba(255,51,102,.15);color:var(--red);border:1px solid rgba(255,51,102,.25)}
+.result-badge{font-size:.72rem;font-weight:800;padding:5px 14px;border-radius:20px;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap}
+.rb-win{background:rgba(0,255,136,.2);color:#00ff88;border:1px solid rgba(0,255,136,.5);box-shadow:0 0 8px rgba(0,255,136,.15)}
+.rb-loss{background:rgba(255,51,102,.2);color:#ff3366;border:1px solid rgba(255,51,102,.5);box-shadow:0 0 8px rgba(255,51,102,.15)}
 .rb-push{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--border)}
 .rb-pending{background:rgba(255,215,0,.1);color:var(--gold);border:1px solid rgba(255,215,0,.3)}
+.history-row.row-win{border-left:3px solid rgba(0,255,136,.5);background:rgba(0,255,136,.025)}
+.history-row.row-loss{border-left:3px solid rgba(255,51,102,.4);background:rgba(255,51,102,.02)}
+.history-row.row-win:hover{background:rgba(0,255,136,.045)}
+.history-row.row-loss:hover{background:rgba(255,51,102,.04)}
+.hist-expand-btn{display:block;width:100%;padding:14px;background:transparent;border:1px dashed rgba(255,255,255,.1);border-top:none;color:var(--muted);font-size:.7rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:.15s;border-radius:0 0 12px 12px}
+.hist-expand-btn:hover{color:var(--text);background:rgba(255,255,255,.03)}
 
 /* ── BREAKDOWN STATS ── */
 .bk-section{margin-top:24px}
@@ -691,6 +697,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1;back
         <span class="hh-col">結果</span>
       </div>
       <div id="history-rows"></div>
+      <button class="hist-expand-btn" id="hist-expand-btn" style="display:none"></button>
     </div>
   </div>
 </section>
@@ -1335,39 +1342,67 @@ function loadData(isRefresh){
 
   // ── HISTORY ──
   const histRows=document.getElementById('history-rows');
+  const histExpandBtn=document.getElementById('hist-expand-btn');
+  const HIST_INIT=7;
   let histFilter='all';
+  let histExpanded=false;
+
+  function buildHistRow(h){
+    const win=h.result==='win'||h.result==='W';
+    const loss=h.result==='loss'||h.result==='L';
+    const isPending=h.result==='P';
+    const row=document.createElement('div');
+    row.className='history-row'+(win?' row-win':loss?' row-loss':isPending?' pending-row':'');
+    if(isPending)row.style.borderLeft='3px solid rgba(255,215,0,.3)';
+    const matchLabel=(h.p1_cn&&h.p2_cn)?`${h.p1||'—'} <span style="color:var(--muted);font-size:.68rem">${h.p1_cn}</span> vs ${h.p2||'—'} <span style="color:var(--muted);font-size:.68rem">${h.p2_cn}</span>`:
+                     `${h.p1||'—'} vs ${h.p2||'—'}`;
+    const betLabel=h.bet_on_cn?`${h.bet_on||'—'} <span style="color:var(--muted);font-size:.68rem">${h.bet_on_cn}</span>`:h.bet_on||'—';
+    row.innerHTML=`
+      <span class="hr-match" style="font-size:.75rem">${matchLabel}${h.date?`<br><span style="font-size:.6rem;color:var(--muted)">${h.date}</span>`:''}</span>
+      <span class="hr-bet" style="font-size:.75rem">${betLabel}</span>
+      <span class="hr-val">${(h.price||0).toFixed(2)}</span>
+      <span class="hr-val" style="color:${win?'var(--green)':loss?'var(--red)':'var(--muted)'}">${fmtEdge(h.edge||0)}</span>
+      <span class="hr-val">${(h.stake||0).toFixed(1)}u</span>
+      <span class="surface-chip ${surfClass(h.surface)}" style="font-size:.6rem;padding:2px 7px;display:inline-block">${surfLabel(h.surface)}</span>
+      <span class="hr-val" style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px">${h.tour_type||h.tour||'—'}</span>
+      <span class="result-badge ${win?'rb-win':loss?'rb-loss':isPending?'rb-pending':'rb-push'}">${isPending?'待結算':win?'✓ 贏':loss?'✗ 輸':resultLabel(h.result)}</span>
+    `;
+    return row;
+  }
+
   function renderHistory(){
     const all=history.slice().reverse();
     const filtered=histFilter==='pending'?all.filter(h=>h.result==='P'):
                    histFilter==='settled'?all.filter(h=>h.result==='W'||h.result==='L'):all;
     histRows.innerHTML='';
+    histExpanded=false;
     if(filtered.length===0){
       histRows.innerHTML='<div style="padding:32px;text-align:center;color:var(--muted);font-size:.85rem">'+(histFilter==='pending'?'目前無待結算紀錄':'尚無歷史紀錄')+'</div>';
+      histExpandBtn.style.display='none';
       return;
     }
-    filtered.forEach(h=>{
-      const win=h.result==='win'||h.result==='W';
-      const loss=h.result==='loss'||h.result==='L';
-      const isPending=h.result==='P';
-      const row=document.createElement('div');
-      row.className='history-row'+(isPending?' pending-row':'');
-      if(isPending)row.style.background='rgba(255,215,0,.02)';
-      const matchLabel=(h.p1_cn&&h.p2_cn)?`${h.p1||'—'} <span style="color:var(--muted);font-size:.68rem">${h.p1_cn}</span> vs ${h.p2||'—'} <span style="color:var(--muted);font-size:.68rem">${h.p2_cn}</span>`:
-                       `${h.p1||'—'} vs ${h.p2||'—'}`;
-      const betLabel=h.bet_on_cn?`${h.bet_on||'—'} <span style="color:var(--muted);font-size:.68rem">${h.bet_on_cn}</span>`:h.bet_on||'—';
-      row.innerHTML=`
-        <span class="hr-match" style="font-size:.75rem">${matchLabel}${h.date?`<br><span style="font-size:.6rem;color:var(--muted)">${h.date}</span>`:''}</span>
-        <span class="hr-bet" style="font-size:.75rem">${betLabel}</span>
-        <span class="hr-val">${(h.price||0).toFixed(2)}</span>
-        <span class="hr-val" style="color:${win?'var(--green)':loss?'var(--red)':'var(--muted)'}">${fmtEdge(h.edge||0)}</span>
-        <span class="hr-val">${(h.stake||0).toFixed(1)}u</span>
-        <span class="surface-chip ${surfClass(h.surface)}" style="font-size:.6rem;padding:2px 7px;display:inline-block">${surfLabel(h.surface)}</span>
-        <span class="hr-val" style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px">${h.tour_type||h.tour||'—'}</span>
-        <span class="result-badge ${win?'rb-win':loss?'rb-loss':isPending?'rb-pending':'rb-push'}">${isPending?'待結算':resultLabel(h.result)}</span>
-      `;
-      histRows.appendChild(row);
-    });
+    const toShow=histExpanded?filtered:filtered.slice(0,HIST_INIT);
+    toShow.forEach(h=>histRows.appendChild(buildHistRow(h)));
+    if(filtered.length>HIST_INIT){
+      const hidden=filtered.length-HIST_INIT;
+      histExpandBtn.style.display='block';
+      histExpandBtn.textContent=histExpanded?'▲ 收起':'▼ 展開全部（還有 '+hidden+' 筆）';
+    } else {
+      histExpandBtn.style.display='none';
+    }
   }
+
+  histExpandBtn.addEventListener('click',()=>{
+    histExpanded=!histExpanded;
+    const all=history.slice().reverse();
+    const filtered=histFilter==='pending'?all.filter(h=>h.result==='P'):
+                   histFilter==='settled'?all.filter(h=>h.result==='W'||h.result==='L'):all;
+    histRows.innerHTML='';
+    const toShow=histExpanded?filtered:filtered.slice(0,HIST_INIT);
+    toShow.forEach(h=>histRows.appendChild(buildHistRow(h)));
+    const hidden=filtered.length-HIST_INIT;
+    histExpandBtn.textContent=histExpanded?'▲ 收起':'▼ 展開全部（還有 '+hidden+' 筆）';
+  });
   // Tab counts
   const pendingCount=history.filter(h=>h.result==='P').length;
   const settledCount=history.filter(h=>h.result==='W'||h.result==='L').length;
