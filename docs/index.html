@@ -397,6 +397,99 @@ footer{padding:40px;text-align:center;border-top:1px solid var(--border);positio
   .model-grid{grid-template-columns:1fr}
 }
 
+/* ── iPHONE 17e / SMALL PHONES (≤430px) ── */
+@media(max-width:430px){
+  /* Nav: compact, hide clock to free space */
+  nav{padding:10px 14px}
+  .nav-clock{display:none}
+  .nav-right{gap:8px}
+
+  /* Sections: narrow side padding from 20px→16px */
+  section{padding:44px 16px}
+
+  /* Tab bar: tighter, smaller text */
+  .main-tabs{padding:0 4px;top:52px}
+  .mtab{padding:10px 10px;font-size:.62rem;letter-spacing:1px;gap:4px}
+  .mtab-icon{font-size:.75rem}
+  .mtab-badge{min-width:15px;height:15px;font-size:.52rem}
+
+  /* Hero */
+  #hero{padding:80px 16px 44px;min-height:auto}
+  .hero-label{font-size:.6rem;letter-spacing:3px;margin-bottom:14px}
+  .hero-title{font-size:1.9rem;letter-spacing:-.5px}
+  .hero-sub{font-size:.8rem;margin-bottom:22px}
+  .hero-metrics{gap:12px}
+  .hm-value{font-size:1.3rem}
+  .hm-label{font-size:.55rem;letter-spacing:1.5px}
+  .hero-edge-banner{padding:12px 14px;gap:6px;margin-top:24px}
+  .eb-value{font-size:1.3rem}
+
+  /* Pick card: reduce internal padding, smaller photos */
+  .pc-header{padding:14px 14px 0}
+  .pc-tournament{padding:6px 14px 0}
+  .pc-tourCn{padding:0 14px 4px}
+  .pc-players{padding:10px 14px}
+  .pc-photo{width:52px;height:52px}
+  .pc-pname{font-size:.75rem;max-width:80px}
+  .pc-vs-col{min-width:34px}
+  .pc-vs{font-size:.58rem}
+  .pc-bet-arrow{font-size:.6rem}
+  .pc-probs{padding:0 14px 10px}
+  .pc-prob-label{font-size:.56rem;min-width:34px}
+  .pc-prob-val{font-size:.67rem;min-width:34px}
+  .pc-edge-tag{font-size:.64rem;padding:3px 10px}
+  .pc-metrics{padding:0 14px 10px;gap:6px}
+  .pm-label{font-size:.55rem}
+  .pm-val{font-size:.85rem}
+  .pc-bet-footer{margin:0 14px 14px;padding:8px 12px;gap:8px}
+  .pc-bet-name{font-size:.75rem}
+  .pc-bet-odds{font-size:.8rem}
+
+  /* History: card layout replacing 8-column grid */
+  .history-header{display:none}
+  .history-row{
+    display:flex;flex-wrap:wrap;
+    align-items:center;row-gap:5px;column-gap:8px;
+    padding:12px 14px 12px 16px;
+  }
+  /* Match name: full width on its own row */
+  .history-row>span:nth-child(1){width:100%;order:1}
+  /* Bet player: takes remaining space */
+  .history-row>span:nth-child(2){flex:1;order:2;font-size:.72rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Price, edge, stake, surface, tour: hidden on small screen */
+  .history-row>span:nth-child(3),
+  .history-row>span:nth-child(4),
+  .history-row>span:nth-child(5),
+  .history-row>span:nth-child(6),
+  .history-row>span:nth-child(7){display:none}
+  /* Result badge: right side, same row as bet player */
+  .history-row>span:nth-child(8){order:3;flex-shrink:0;display:inline-flex}
+
+  /* Performance terminal */
+  .terminal-top{padding:12px 16px}
+  .perf-stats{padding:20px 16px}
+  .chart-area{padding:16px}
+  .bk-card{padding:12px 14px}
+  .bk-wr{font-size:1.25rem}
+
+  /* Filters */
+  .filter-bar{gap:6px}
+  .filter-btn{padding:6px 12px;font-size:.66rem;letter-spacing:.5px}
+  .hist-tabs{gap:6px}
+  .hist-tab{padding:6px 14px;font-size:.66rem;letter-spacing:.5px}
+  .picks-sub-filters{gap:6px}
+  .psf-btn{padding:5px 12px;font-size:.64rem}
+
+  /* Modal: tighter padding */
+  .modal-card{padding:24px 20px;border-radius:16px}
+
+  /* Footer */
+  footer{padding:28px 16px}
+
+  /* Toast: fix bottom position for safe area */
+  #refresh-toast{bottom:32px;padding:10px 22px;font-size:.72rem}
+}
+
 /* ── REFRESH BUTTON ── */
 .refresh-btn{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:100px;border:1px solid rgba(0,255,136,.35);background:rgba(0,255,136,.06);color:var(--green);font-size:.72rem;font-weight:700;letter-spacing:1px;cursor:pointer;transition:.2s;text-transform:uppercase}
 .refresh-btn:hover{background:rgba(0,255,136,.14);border-color:var(--green);box-shadow:var(--glow-green)}
