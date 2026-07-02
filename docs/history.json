@@ -591,6 +591,48 @@
       "result": "P",
       "opening_dv_p": 53.8,
       "model_p": 68.8
+    },
+    {
+      "date": "2026-07-02",
+      "p1": "Taylor Fritz",
+      "p2": "Patrick Kypson",
+      "p1_cn": "弗里茨",
+      "p2_cn": "Kypson",
+      "bet_on": "Taylor Fritz",
+      "bet_on_cn": "弗里茨",
+      "price": 1.09,
+      "stake": 50.0,
+      "edge": 15.0,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "ATP",
+      "commence": "2026-07-02T10:00:00Z",
+      "recorded_at": "2026-07-02T08:14:32Z",
+      "result": "P",
+      "opening_dv_p": 56.0,
+      "model_p": 71.0
+    },
+    {
+      "date": "2026-07-02",
+      "p1": "Emma Navarro",
+      "p2": "Oksana Selekhmeteva",
+      "p1_cn": "納瓦羅",
+      "p2_cn": "塞萊赫梅捷娃",
+      "bet_on": "Emma Navarro",
+      "bet_on_cn": "納瓦羅",
+      "price": 1.25,
+      "stake": 50.0,
+      "edge": 15.0,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "WTA",
+      "commence": "2026-07-02T10:00:00Z",
+      "recorded_at": "2026-07-02T08:14:32Z",
+      "result": "P",
+      "opening_dv_p": 53.4,
+      "model_p": 68.4
     }
   ]
 }
