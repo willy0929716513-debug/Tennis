@@ -696,6 +696,27 @@
       "result": "P",
       "opening_dv_p": 52.8,
       "model_p": 67.8
+    },
+    {
+      "date": "2026-07-03",
+      "p1": "Arthur Rinderknech",
+      "p2": "Novak Djokovic",
+      "p1_cn": "林德克內希",
+      "p2_cn": "德約科維奇",
+      "bet_on": "Novak Djokovic",
+      "bet_on_cn": "德約科維奇",
+      "price": 1.13,
+      "stake": 50.0,
+      "edge": 15.0,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "ATP",
+      "commence": "2026-07-03T12:30:00Z",
+      "recorded_at": "2026-07-03T08:10:56Z",
+      "result": "P",
+      "opening_dv_p": 54.8,
+      "model_p": 69.8
     }
   ]
 }
