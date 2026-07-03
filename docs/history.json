@@ -717,6 +717,48 @@
       "result": "P",
       "opening_dv_p": 54.8,
       "model_p": 69.8
+    },
+    {
+      "date": "2026-07-03",
+      "p1": "Jannik Sinner",
+      "p2": "Jenson Brooksby",
+      "p1_cn": "辛納",
+      "p2_cn": "Brooksby",
+      "bet_on": "Jannik Sinner",
+      "bet_on_cn": "辛納",
+      "price": 1.04,
+      "stake": 50.0,
+      "edge": 15.0,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "ATP",
+      "commence": "2026-07-03T13:45:00Z",
+      "recorded_at": "2026-07-03T12:08:52Z",
+      "result": "P",
+      "opening_dv_p": 57.1,
+      "model_p": 72.1
+    },
+    {
+      "date": "2026-07-03",
+      "p1": "Alejandro Davidovich Fokina",
+      "p2": "Marton Fucsovics",
+      "p1_cn": "達維多維奇",
+      "p2_cn": "富科維奇",
+      "bet_on": "Alejandro Davidovich Fokina",
+      "bet_on_cn": "達維多維奇",
+      "price": 1.31,
+      "stake": 50.0,
+      "edge": 15.0,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "ATP",
+      "commence": "2026-07-03T14:00:00Z",
+      "recorded_at": "2026-07-03T12:08:52Z",
+      "result": "P",
+      "opening_dv_p": 52.8,
+      "model_p": 67.8
     }
   ]
 }
