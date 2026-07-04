@@ -3705,7 +3705,7 @@ def load_history() -> dict:
 
 
 def save_history(hist: dict) -> None:
-    # Write to local file only — Gist is managed exclusively by the user
+    # 1. Write to local file
     os.makedirs("docs", exist_ok=True)
     try:
         with open(HISTORY_PATH, "w", encoding="utf-8") as f:
@@ -3713,6 +3713,58 @@ def save_history(hist: dict) -> None:
         log.info("save_history: wrote %d bets to %s", len(hist.get("bets", [])), HISTORY_PATH)
     except Exception as e:
         log.warning("save_history file: %s", e)
+
+    # 2. Sync to Gist — preserve any W/L results the user already filled in
+    if not GIST_TOKEN or not GIST_ID:
+        return
+    try:
+        r = requests.get(
+            "https://api.github.com/gists/%s" % GIST_ID,
+            headers={"Authorization": "token %s" % GIST_TOKEN},
+            timeout=15,
+        )
+        r.raise_for_status()
+        gist_data = r.json()
+    except Exception as e:
+        log.warning("save_history gist read: %s", e)
+        return
+
+    # Find the existing JSON file name (default: tennis_hist.json)
+    gist_fname = "tennis_hist.json"
+    gist_results: dict[str, str] = {}
+    for fname, fd in gist_data.get("files", {}).items():
+        if fname.endswith(".json"):
+            gist_fname = fname
+            try:
+                old = json.loads(fd.get("content", "{}"))
+                # Build map of existing user-entered results (W/L only)
+                for b in old.get("bets", []):
+                    res = b.get("result", "P")
+                    if res in ("W", "L", "push", "W/O"):
+                        key = b.get("commence", "") + "|" + b.get("bet_on", "")
+                        gist_results[key] = res
+            except json.JSONDecodeError:
+                pass
+            break
+
+    # Merge: apply user's W/L results back onto the new history before uploading
+    merged = json.loads(json.dumps(hist))  # deep copy
+    for bet in merged.get("bets", []):
+        key = bet.get("commence", "") + "|" + bet.get("bet_on", "")
+        if key in gist_results:
+            bet["result"] = gist_results[key]
+
+    try:
+        patch = requests.patch(
+            "https://api.github.com/gists/%s" % GIST_ID,
+            headers={"Authorization": "token %s" % GIST_TOKEN},
+            json={"files": {gist_fname: {"content": json.dumps(merged, ensure_ascii=False, indent=2)}}},
+            timeout=15,
+        )
+        patch.raise_for_status()
+        log.info("save_history: synced %d bets to Gist (%s)", len(merged.get("bets", [])), gist_fname)
+    except Exception as e:
+        log.warning("save_history gist write: %s", e)
 
 
 def picks_starting_soon(picks: List[dict], now_utc: datetime.datetime,
