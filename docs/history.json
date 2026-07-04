@@ -759,6 +759,27 @@
       "result": "P",
       "opening_dv_p": 52.8,
       "model_p": 67.8
+    },
+    {
+      "date": "2026-07-04",
+      "p1": "Jiri Lehecka",
+      "p2": "Jaume Munar",
+      "p1_cn": "萊赫卡",
+      "p2_cn": "穆納爾",
+      "bet_on": "Jiri Lehecka",
+      "bet_on_cn": "萊赫卡",
+      "price": 1.33,
+      "stake": 50.0,
+      "edge": 15.0,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "ATP",
+      "commence": "2026-07-04T12:00:00Z",
+      "recorded_at": "2026-07-04T07:47:26Z",
+      "result": "P",
+      "opening_dv_p": 52.5,
+      "model_p": 67.5
     }
   ]
 }
