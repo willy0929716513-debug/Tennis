@@ -780,6 +780,48 @@
       "result": "P",
       "opening_dv_p": 52.5,
       "model_p": 67.5
+    },
+    {
+      "date": "2026-07-04",
+      "p1": "Marcos Giron",
+      "p2": "Alexander Zverev",
+      "p1_cn": "Giron",
+      "p2_cn": "茲韋列夫",
+      "bet_on": "Alexander Zverev",
+      "bet_on_cn": "茲韋列夫",
+      "price": 1.09,
+      "stake": 50.0,
+      "edge": 15.0,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "ATP",
+      "commence": "2026-07-04T13:10:00Z",
+      "recorded_at": "2026-07-04T11:24:57Z",
+      "result": "P",
+      "opening_dv_p": 55.6,
+      "model_p": 70.6
+    },
+    {
+      "date": "2026-07-04",
+      "p1": "Taylor Fritz",
+      "p2": "Lorenzo Sonego",
+      "p1_cn": "弗里茨",
+      "p2_cn": "索內戈",
+      "bet_on": "Taylor Fritz",
+      "bet_on_cn": "弗里茨",
+      "price": 1.14,
+      "stake": 50.0,
+      "edge": 15.0,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "ATP",
+      "commence": "2026-07-04T13:48:00Z",
+      "recorded_at": "2026-07-04T11:24:57Z",
+      "result": "P",
+      "opening_dv_p": 54.3,
+      "model_p": 69.3
     }
   ]
 }
