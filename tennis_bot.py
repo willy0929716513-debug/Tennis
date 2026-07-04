@@ -3717,13 +3717,47 @@ def save_history(hist: dict) -> None:
     if not GIST_TOKEN or not GIST_ID:
         return
     try:
+        # Read existing Gist first so we don't overwrite manually-set W/L results
+        existing: dict = {}
+        try:
+            gr = requests.get(
+                "https://api.github.com/gists/%s" % GIST_ID,
+                headers={"Authorization": "token %s" % GIST_TOKEN},
+                timeout=15,
+            )
+            if gr.ok:
+                for _fname, fd in gr.json().get("files", {}).items():
+                    if _fname.endswith(".json"):
+                        existing = json.loads(fd.get("content", "{}"))
+                        break
+        except Exception:
+            pass
+        # Build a map of already-settled results from the Gist
+        settled = {
+            (b.get("commence", "") + "|" + b.get("bet_on", "")): b.get("result")
+            for b in existing.get("bets", [])
+            if b.get("result") in ("W", "L", "win", "loss", "push", "W/O")
+        }
+        # Merge: preserve W/L from Gist; only write P for still-pending bets
+        merged_bets = []
+        for bet in hist.get("bets", []):
+            key = bet.get("commence", "") + "|" + bet.get("bet_on", "")
+            if bet.get("result") == "P" and key in settled:
+                bet = dict(bet)
+                bet["result"] = settled[key]
+            merged_bets.append(bet)
+        merged = dict(hist)
+        merged["bets"] = merged_bets
         requests.patch(
             "https://api.github.com/gists/%s" % GIST_ID,
             headers={"Authorization": "token %s" % GIST_TOKEN},
             json={"files": {"tennis_hist.json": {
-                "content": json.dumps(hist, ensure_ascii=False, indent=2)}}},
+                "content": json.dumps(merged, ensure_ascii=False, indent=2)}}},
             timeout=15,
         )
+        preserved = len(settled)
+        if preserved:
+            log.info("save_history gist: preserved %d settled result(s) from Gist", preserved)
     except Exception as e:
         log.warning("save_history gist: %s", e)
 
