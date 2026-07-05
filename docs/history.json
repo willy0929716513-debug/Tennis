@@ -843,6 +843,27 @@
       "result": "P",
       "opening_dv_p": 54.5,
       "model_p": 69.5
+    },
+    {
+      "date": "2026-07-05",
+      "p1": "Roman Safiullin",
+      "p2": "Novak Djokovic",
+      "p1_cn": "薩菲烏林",
+      "p2_cn": "德約科維奇",
+      "bet_on": "Novak Djokovic",
+      "bet_on_cn": "德約科維奇",
+      "price": 1.2,
+      "stake": 50.0,
+      "edge": 13.8,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "ATP",
+      "commence": "2026-07-05T12:30:00Z",
+      "recorded_at": "2026-07-05T07:57:41Z",
+      "result": "P",
+      "opening_dv_p": 53.9,
+      "model_p": 67.7
     }
   ]
 }
