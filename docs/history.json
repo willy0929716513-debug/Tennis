@@ -990,6 +990,27 @@
       "result": "P",
       "opening_dv_p": 52.9,
       "model_p": 66.3
+    },
+    {
+      "date": "2026-07-06",
+      "p1": "Taylor Fritz",
+      "p2": "Alexander Bublik",
+      "p1_cn": "弗里茨",
+      "p2_cn": "布布利克",
+      "bet_on": "Taylor Fritz",
+      "bet_on_cn": "弗里茨",
+      "price": 1.51,
+      "stake": 50.0,
+      "edge": 15.0,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "ATP",
+      "commence": "2026-07-06T15:48:00Z",
+      "recorded_at": "2026-07-06T13:42:57Z",
+      "result": "P",
+      "opening_dv_p": 51.6,
+      "model_p": 66.6
     }
   ]
 }
