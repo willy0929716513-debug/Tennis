@@ -927,6 +927,27 @@
       "result": "P",
       "opening_dv_p": 51.8,
       "model_p": 65.2
+    },
+    {
+      "date": "2026-07-06",
+      "p1": "Ashlyn Krueger",
+      "p2": "Marta Kostyuk",
+      "p1_cn": "克魯格",
+      "p2_cn": "科斯秋克",
+      "bet_on": "Marta Kostyuk",
+      "bet_on_cn": "科斯秋克",
+      "price": 1.46,
+      "stake": 50.0,
+      "edge": 14.2,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "WTA",
+      "commence": "2026-07-06T10:00:00Z",
+      "recorded_at": "2026-07-06T05:10:11Z",
+      "result": "P",
+      "opening_dv_p": 51.8,
+      "model_p": 66.0
     }
   ]
 }
