@@ -67,7 +67,7 @@
       "p2_sv_pct": 69.6,
       "elo1": 2094.8,
       "elo2": 1964.5,
-      "expected_games": 45.5,
+      "expected_games": 45.0,
       "best_of": 5,
       "h2h_adj": 3.0,
       "hb_p1": 51.3,
@@ -316,7 +316,7 @@
       "p2_sv_pct": 61.9,
       "elo1": 2026.6,
       "elo2": 1901.8,
-      "expected_games": 39.9,
+      "expected_games": 39.7,
       "best_of": 5,
       "h2h_adj": 0.0,
       "hb_p1": 55.3,
@@ -391,15 +391,15 @@
       "best_price": 1.36,
       "model_p": 66.1,
       "raw_model_p": 66.1,
-      "dv_p": 54.2,
-      "edge": 11.9,
-      "conf": 82.2,
+      "dv_p": 54.4,
+      "edge": 11.7,
+      "conf": 82.3,
       "stake": 50.0,
       "p1_sv_pct": 60.2,
       "p2_sv_pct": 62.1,
       "elo1": 1521.2,
       "elo2": 1915.1,
-      "expected_games": 41.5,
+      "expected_games": 41.1,
       "best_of": 5,
       "h2h_adj": 0.0,
       "hb_p1": 48.3,
@@ -448,7 +448,7 @@
       "ret_depth_adj": 0.87,
       "inj_adj": -1.5,
       "public_bias_adj": -1.5,
-      "opening_dv_p": 54.2,
+      "opening_dv_p": 54.4,
       "p1_country": "",
       "p2_country": "UKR",
       "is_value": false
@@ -1458,7 +1458,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 39.9
+      "exp_games": 39.7
     },
     "grigor dimitrov|arthur fery": {
       "p1": "Grigor Dimitrov",
@@ -1469,7 +1469,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 43.5
+      "exp_games": 43.7
     },
     "taylor fritz|alexander bublik": {
       "p1": "Taylor Fritz",
@@ -1480,7 +1480,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 45.5
+      "exp_games": 45.0
     },
     "jiri lehecka|alexander zverev": {
       "p1": "Jiri Lehecka",
@@ -1491,7 +1491,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 45.2
+      "exp_games": 45.1
     },
     "felix auger-aliassime|novak djokovic": {
       "p1": "Felix Auger-Aliassime",
@@ -1502,7 +1502,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 45.3
+      "exp_games": 45.7
     },
     "jannik sinner|jan-lennard struff": {
       "p1": "Jannik Sinner",
@@ -1524,7 +1524,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 41.5
+      "exp_games": 41.1
     },
     "marie bouzkova|elise mertens": {
       "p1": "Marie Bouzkova",
@@ -1535,7 +1535,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 41.1
+      "exp_games": 41.3
     },
     "jasmine paolini|alexandra eala": {
       "p1": "Jasmine Paolini",
@@ -1568,7 +1568,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 40.8
+      "exp_games": 40.9
     },
     "naomi osaka|karolina muchova": {
       "p1": "Naomi Osaka",
