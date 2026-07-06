@@ -948,6 +948,48 @@
       "result": "P",
       "opening_dv_p": 51.8,
       "model_p": 66.0
+    },
+    {
+      "date": "2026-07-06",
+      "p1": "Jasmine Paolini",
+      "p2": "Alexandra Eala",
+      "p1_cn": "保利尼",
+      "p2_cn": "埃阿拉",
+      "bet_on": "Jasmine Paolini",
+      "bet_on_cn": "保利尼",
+      "price": 2.46,
+      "stake": 92.0,
+      "edge": 15.0,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "WTA",
+      "commence": "2026-07-06T12:30:00Z",
+      "recorded_at": "2026-07-06T09:00:46Z",
+      "result": "P",
+      "opening_dv_p": 49.1,
+      "model_p": 64.1
+    },
+    {
+      "date": "2026-07-06",
+      "p1": "Alex de Minaur",
+      "p2": "Flavio Cobolli",
+      "p1_cn": "德米諾爾",
+      "p2_cn": "科博利",
+      "bet_on": "Alex de Minaur",
+      "bet_on_cn": "德米諾爾",
+      "price": 1.3,
+      "stake": 50.0,
+      "edge": 13.4,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "ATP",
+      "commence": "2026-07-06T12:00:00Z",
+      "recorded_at": "2026-07-06T09:00:46Z",
+      "result": "P",
+      "opening_dv_p": 52.9,
+      "model_p": 66.3
     }
   ]
 }
