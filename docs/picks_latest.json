@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-07 04:53 (台灣時間)",
-  "generated_at_iso": "2026-07-07T04:53:18+08:00",
+  "generated_at": "2026-07-07 16:20 (台灣時間)",
+  "generated_at_iso": "2026-07-07T16:20:56+08:00",
   "date": "2026-07-07",
   "model_version": "v4.0 — PowerDevig+DynH2H+ExpForm+RecencyELO+ProbCalib+15factor",
   "stats": {
@@ -9,7 +9,7 @@
     "win_rate": 79.5,
     "pnl": 515.3,
     "roi": 22.8,
-    "pending": 11,
+    "pending": 12,
     "streak": 15,
     "by_tier": {
       "A": {
@@ -67,7 +67,7 @@
       "p2_sv_pct": 66.0,
       "elo1": 2257.0,
       "elo2": 1729.8,
-      "expected_games": 42.7,
+      "expected_games": 42.2,
       "best_of": 5,
       "h2h_adj": 0.0,
       "hb_p1": 53.6,
@@ -94,7 +94,7 @@
       "court_speed": 0.0,
       "altitude_adj": 0.0,
       "wind_adj": 0.0,
-      "wind_kmh": 14.0,
+      "wind_kmh": 13.0,
       "streak_adj": 0.0,
       "win_streak1": 4,
       "win_streak2": 4,
@@ -123,6 +123,27 @@
     }
   ],
   "recent_history": [
+    {
+      "date": "2026-07-07",
+      "p1": "Jannik Sinner",
+      "p2": "Jan-Lennard Struff",
+      "p1_cn": "辛納",
+      "p2_cn": "施特魯夫",
+      "bet_on": "Jannik Sinner",
+      "bet_on_cn": "辛納",
+      "price": 1.06,
+      "stake": 50.0,
+      "edge": 15.0,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "ATP",
+      "commence": "2026-07-07T12:00:00Z",
+      "recorded_at": "2026-07-07T08:22:30Z",
+      "result": "P",
+      "opening_dv_p": 56.4,
+      "model_p": 71.4
+    },
     {
       "date": "2026-07-06",
       "p1": "Taylor Fritz",
@@ -1121,19 +1142,6 @@
       "result": "L",
       "opening_dv_p": 41.5,
       "model_p": 62.7
-    },
-    {
-      "date": "2026-05-22",
-      "p1": "Aliaksandra Sasnovich",
-      "p2": "Marina Bassols Ribera",
-      "bet_on": "Marina Bassols Ribera",
-      "price": 3.71,
-      "stake": 119,
-      "edge": 37.4,
-      "tier": "A",
-      "surface": "clay",
-      "tour": "大滿貫",
-      "result": "W"
     }
   ],
   "live_matches": [],
@@ -1147,7 +1155,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 45.1
+      "exp_games": 45.2
     },
     "jannik sinner|jan-lennard struff": {
       "p1": "Jannik Sinner",
@@ -1158,7 +1166,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 42.7
+      "exp_games": 42.2
     },
     "felix auger-aliassime|novak djokovic": {
       "p1": "Felix Auger-Aliassime",
@@ -1169,7 +1177,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 45.6
+      "exp_games": 45.5
     },
     "flavio cobolli|arthur fery": {
       "p1": "Flavio Cobolli",
@@ -1177,6 +1185,28 @@
       "p1_key": "cobolli",
       "p2_key": "arthur_fery",
       "model_p1": 0.5138,
+      "surface": "grass",
+      "tour_level": "grand_slam",
+      "best_of": 5,
+      "exp_games": 42.1
+    },
+    "jessica pegula|coco gauff": {
+      "p1": "Jessica Pegula",
+      "p2": "Coco Gauff",
+      "p1_key": "pegula",
+      "p2_key": "gauff",
+      "model_p1": 0.4812,
+      "surface": "grass",
+      "tour_level": "grand_slam",
+      "best_of": 5,
+      "exp_games": 41.1
+    },
+    "naomi osaka|karolina muchova": {
+      "p1": "Naomi Osaka",
+      "p2": "Karolina Muchova",
+      "p1_key": "osaka",
+      "p2_key": "muchova",
+      "model_p1": 0.4361,
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
@@ -1191,7 +1221,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 41.7
+      "exp_games": 42.0
     },
     "marta kostyuk|jasmine paolini": {
       "p1": "Marta Kostyuk",
@@ -1202,29 +1232,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 41.1
-    },
-    "jessica pegula|coco gauff": {
-      "p1": "Jessica Pegula",
-      "p2": "Coco Gauff",
-      "p1_key": "pegula",
-      "p2_key": "gauff",
-      "model_p1": 0.4812,
-      "surface": "grass",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 40.7
-    },
-    "naomi osaka|karolina muchova": {
-      "p1": "Naomi Osaka",
-      "p2": "Karolina Muchova",
-      "p1_key": "osaka",
-      "p2_key": "muchova",
-      "model_p1": 0.4361,
-      "surface": "grass",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 42.0
+      "exp_games": 41.0
     }
   }
 }

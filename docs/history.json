@@ -1011,6 +1011,27 @@
       "result": "P",
       "opening_dv_p": 51.6,
       "model_p": 66.6
+    },
+    {
+      "date": "2026-07-07",
+      "p1": "Jannik Sinner",
+      "p2": "Jan-Lennard Struff",
+      "p1_cn": "辛納",
+      "p2_cn": "施特魯夫",
+      "bet_on": "Jannik Sinner",
+      "bet_on_cn": "辛納",
+      "price": 1.06,
+      "stake": 50.0,
+      "edge": 15.0,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "ATP",
+      "commence": "2026-07-07T12:00:00Z",
+      "recorded_at": "2026-07-07T08:22:30Z",
+      "result": "P",
+      "opening_dv_p": 56.4,
+      "model_p": 71.4
     }
   ]
 }
