@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-07 20:23 (台灣時間)",
-  "generated_at_iso": "2026-07-07T20:23:59+08:00",
-  "date": "2026-07-07",
+  "generated_at": "2026-07-08 04:50 (台灣時間)",
+  "generated_at_iso": "2026-07-08T04:50:07+08:00",
+  "date": "2026-07-08",
   "model_version": "v4.0 — PowerDevig+DynH2H+ExpForm+RecencyELO+ProbCalib+15factor",
   "stats": {
     "settled": 39,
@@ -37,91 +37,7 @@
       }
     }
   },
-  "picks": [
-    {
-      "tier": "A",
-      "star": "💎",
-      "surface_emoji": "🟢",
-      "tour": "大滿貫",
-      "tour_level": "grand_slam",
-      "tour_type": "ATP",
-      "tournament": "wimbledon",
-      "sport_title": "ATP Wimbledon",
-      "surface": "grass",
-      "p1": "Jannik Sinner",
-      "p2": "Jan-Lennard Struff",
-      "p1_cn": "辛納",
-      "p2_cn": "施特魯夫",
-      "p1_key": "sinner",
-      "p2_key": "jan_lennard_struff",
-      "bet_on": "Jannik Sinner",
-      "bet_on_cn": "辛納",
-      "best_price": 1.08,
-      "model_p": 70.6,
-      "raw_model_p": 77.4,
-      "dv_p": 55.6,
-      "edge": 15.0,
-      "conf": 91.1,
-      "stake": 50.0,
-      "p1_sv_pct": 72.1,
-      "p2_sv_pct": 66.0,
-      "elo1": 2257.0,
-      "elo2": 1729.8,
-      "expected_games": 42.5,
-      "best_of": 5,
-      "h2h_adj": 0.0,
-      "hb_p1": 53.6,
-      "form_adj": 4.2,
-      "fat_adj": 0.0,
-      "fatigue1": 0.0,
-      "fatigue2": 0.0,
-      "form1": 92.3,
-      "form2": 61.3,
-      "commence": "2026-07-07T12:13:20Z",
-      "adv_p1": 54.7,
-      "clutch_adj": -0.6,
-      "df_adj": 0.4,
-      "lefty_adj": 0.0,
-      "backhand_adj": 0.0,
-      "tb_win1": 50.0,
-      "tb_win2": 50.0,
-      "bp_save1": 61.8,
-      "bp_save2": 68.7,
-      "df_rate1": 2.88,
-      "df_rate2": 4.46,
-      "ace_rate1": 11.18,
-      "ace_rate2": 10.45,
-      "court_speed": 0.0,
-      "altitude_adj": 0.0,
-      "wind_adj": 0.0,
-      "wind_kmh": 14.8,
-      "streak_adj": 0.0,
-      "win_streak1": 4,
-      "win_streak2": 4,
-      "bo5_adj": 1.8,
-      "fs_adj": 0.79,
-      "bp_atk_adj": 0.59,
-      "cond_adj": 0.0,
-      "bp_conv1": 44.9,
-      "bp_conv2": 40.0,
-      "fs_pct1": 62.6,
-      "fs_pct2": 57.3,
-      "load1": 3,
-      "load2": 3,
-      "steam": "",
-      "n_books": 16,
-      "eff_min_edge": 9.0,
-      "style_adj": -0.0,
-      "surf_trans_adj": 0.0,
-      "ret_depth_adj": 1.84,
-      "inj_adj": 0.0,
-      "public_bias_adj": 1.5,
-      "opening_dv_p": 55.6,
-      "p1_country": "ITA",
-      "p2_country": "",
-      "is_value": false
-    }
-  ],
+  "picks": [],
   "recent_history": [
     {
       "date": "2026-07-07",
@@ -1146,28 +1062,6 @@
   ],
   "live_matches": [],
   "game_preds": {
-    "jiri lehecka|alexander zverev": {
-      "p1": "Jiri Lehecka",
-      "p2": "Alexander Zverev",
-      "p1_key": "lehecka",
-      "p2_key": "zverev",
-      "model_p1": 0.4061,
-      "surface": "grass",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 45.3
-    },
-    "jannik sinner|jan-lennard struff": {
-      "p1": "Jannik Sinner",
-      "p2": "Jan-Lennard Struff",
-      "p1_key": "sinner",
-      "p2_key": "jan_lennard_struff",
-      "model_p1": 0.7667,
-      "surface": "grass",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 42.5
-    },
     "felix auger-aliassime|novak djokovic": {
       "p1": "Felix Auger-Aliassime",
       "p2": "Novak Djokovic",
@@ -1177,7 +1071,18 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 45.5
+      "exp_games": 45.4
+    },
+    "taylor fritz|alexander zverev": {
+      "p1": "Taylor Fritz",
+      "p2": "Alexander Zverev",
+      "p1_key": "fritz",
+      "p2_key": "zverev",
+      "model_p1": 0.5373,
+      "surface": "grass",
+      "tour_level": "grand_slam",
+      "best_of": 5,
+      "exp_games": 46.0
     },
     "flavio cobolli|arthur fery": {
       "p1": "Flavio Cobolli",
@@ -1188,29 +1093,18 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 41.8
-    },
-    "jessica pegula|coco gauff": {
-      "p1": "Jessica Pegula",
-      "p2": "Coco Gauff",
-      "p1_key": "pegula",
-      "p2_key": "gauff",
-      "model_p1": 0.4812,
-      "surface": "grass",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 40.9
-    },
-    "naomi osaka|karolina muchova": {
-      "p1": "Naomi Osaka",
-      "p2": "Karolina Muchova",
-      "p1_key": "osaka",
-      "p2_key": "muchova",
-      "model_p1": 0.4361,
-      "surface": "grass",
-      "tour_level": "grand_slam",
-      "best_of": 5,
       "exp_games": 42.1
+    },
+    "karolina muchova|coco gauff": {
+      "p1": "Karolina Muchova",
+      "p2": "Coco Gauff",
+      "p1_key": "muchova",
+      "p2_key": "gauff",
+      "model_p1": 0.476,
+      "surface": "grass",
+      "tour_level": "grand_slam",
+      "best_of": 5,
+      "exp_games": 41.3
     },
     "linda noskova|elise mertens": {
       "p1": "Linda Noskova",
@@ -1221,7 +1115,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 41.7
+      "exp_games": 42.1
     },
     "marta kostyuk|jasmine paolini": {
       "p1": "Marta Kostyuk",
@@ -1232,7 +1126,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 40.9
+      "exp_games": 41.0
     }
   }
 }
