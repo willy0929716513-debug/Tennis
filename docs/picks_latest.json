@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-08 15:26 (台灣時間)",
-  "generated_at_iso": "2026-07-08T15:26:35+08:00",
+  "generated_at": "2026-07-08 19:44 (台灣時間)",
+  "generated_at_iso": "2026-07-08T19:44:05+08:00",
   "date": "2026-07-08",
   "model_version": "v4.0 — PowerDevig+DynH2H+ExpForm+RecencyELO+ProbCalib+15factor",
   "stats": {
@@ -1071,7 +1071,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 45.6
+      "exp_games": 46.1
     },
     "flavio cobolli|arthur fery": {
       "p1": "Flavio Cobolli",
@@ -1082,7 +1082,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 42.1
+      "exp_games": 41.8
     },
     "jannik sinner|novak djokovic": {
       "p1": "Jannik Sinner",
@@ -1093,7 +1093,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 44.7
+      "exp_games": 44.6
     },
     "linda noskova|elise mertens": {
       "p1": "Linda Noskova",
@@ -1104,7 +1104,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 42.1
+      "exp_games": 41.8
     },
     "marta kostyuk|jasmine paolini": {
       "p1": "Marta Kostyuk",
@@ -1115,7 +1115,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 40.9
+      "exp_games": 41.0
     },
     "karolina muchova|coco gauff": {
       "p1": "Karolina Muchova",
@@ -1126,7 +1126,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 41.2
+      "exp_games": 41.0
     }
   }
 }
