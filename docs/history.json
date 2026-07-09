@@ -777,7 +777,7 @@
       "tour_type": "ATP",
       "commence": "2026-07-04T12:00:00Z",
       "recorded_at": "2026-07-04T07:47:26Z",
-      "result": "P",
+      "result": "W",
       "opening_dv_p": 52.5,
       "model_p": 67.5
     },
@@ -798,7 +798,7 @@
       "tour_type": "ATP",
       "commence": "2026-07-04T13:10:00Z",
       "recorded_at": "2026-07-04T11:24:57Z",
-      "result": "P",
+      "result": "W",
       "opening_dv_p": 55.6,
       "model_p": 70.6
     },
@@ -840,7 +840,7 @@
       "tour_type": "ATP",
       "commence": "2026-07-04T16:45:15Z",
       "recorded_at": "2026-07-04T16:50:02Z",
-      "result": "P",
+      "result": "W",
       "opening_dv_p": 54.5,
       "model_p": 69.5
     },
@@ -861,7 +861,7 @@
       "tour_type": "ATP",
       "commence": "2026-07-05T12:30:00Z",
       "recorded_at": "2026-07-05T07:57:41Z",
-      "result": "P",
+      "result": "W",
       "opening_dv_p": 53.9,
       "model_p": 67.7
     },
@@ -882,7 +882,7 @@
       "tour_type": "ATP",
       "commence": "2026-07-05T13:30:00Z",
       "recorded_at": "2026-07-05T11:29:02Z",
-      "result": "P",
+      "result": "L",
       "opening_dv_p": 52.4,
       "model_p": 67.4
     },
@@ -903,7 +903,7 @@
       "tour_type": "ATP",
       "commence": "2026-07-05T15:20:00Z",
       "recorded_at": "2026-07-05T11:29:02Z",
-      "result": "P",
+      "result": "W",
       "opening_dv_p": 57.3,
       "model_p": 72.3
     },
@@ -924,7 +924,7 @@
       "tour_type": "WTA",
       "commence": "2026-07-05T14:30:00Z",
       "recorded_at": "2026-07-05T11:29:02Z",
-      "result": "P",
+      "result": "L",
       "opening_dv_p": 51.8,
       "model_p": 65.2
     },
@@ -945,7 +945,7 @@
       "tour_type": "WTA",
       "commence": "2026-07-06T10:00:00Z",
       "recorded_at": "2026-07-06T05:10:11Z",
-      "result": "P",
+      "result": "W",
       "opening_dv_p": 51.8,
       "model_p": 66.0
     },
@@ -966,7 +966,7 @@
       "tour_type": "WTA",
       "commence": "2026-07-06T12:30:00Z",
       "recorded_at": "2026-07-06T09:00:46Z",
-      "result": "P",
+      "result": "W",
       "opening_dv_p": 49.1,
       "model_p": 64.1
     },
@@ -987,7 +987,7 @@
       "tour_type": "ATP",
       "commence": "2026-07-06T12:00:00Z",
       "recorded_at": "2026-07-06T09:00:46Z",
-      "result": "P",
+      "result": "W",
       "opening_dv_p": 52.9,
       "model_p": 66.3
     },
@@ -1008,7 +1008,7 @@
       "tour_type": "ATP",
       "commence": "2026-07-06T15:48:00Z",
       "recorded_at": "2026-07-06T13:42:57Z",
-      "result": "P",
+      "result": "W",
       "opening_dv_p": 51.6,
       "model_p": 66.6
     },
@@ -1029,7 +1029,7 @@
       "tour_type": "ATP",
       "commence": "2026-07-07T12:00:00Z",
       "recorded_at": "2026-07-07T08:22:30Z",
-      "result": "P",
+      "result": "W",
       "opening_dv_p": 56.4,
       "model_p": 71.4
     }
