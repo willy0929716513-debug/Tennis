@@ -1032,6 +1032,27 @@
       "result": "W",
       "opening_dv_p": 56.4,
       "model_p": 71.4
+    },
+    {
+      "date": "2026-07-10",
+      "p1": "Arthur Fery",
+      "p2": "Alexander Zverev",
+      "p1_cn": "Fery",
+      "p2_cn": "茲韋列夫",
+      "bet_on": "Alexander Zverev",
+      "bet_on_cn": "茲韋列夫",
+      "price": 1.17,
+      "stake": 50.0,
+      "edge": 15.0,
+      "tier": "A",
+      "surface": "grass",
+      "tour": "大滿貫",
+      "tour_type": "ATP",
+      "commence": "2026-07-10T12:30:00Z",
+      "recorded_at": "2026-07-10T08:21:51Z",
+      "result": "P",
+      "opening_dv_p": 54.2,
+      "model_p": 69.2
     }
   ]
 }
