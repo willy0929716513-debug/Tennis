@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-12 04:06 (台灣時間)",
-  "generated_at_iso": "2026-07-12T04:06:24+08:00",
+  "generated_at": "2026-07-12 15:26 (台灣時間)",
+  "generated_at_iso": "2026-07-12T15:26:53+08:00",
   "date": "2026-07-12",
   "model_version": "v4.0 — PowerDevig+DynH2H+ExpForm+RecencyELO+ProbCalib+15factor",
   "stats": {
@@ -1077,7 +1077,7 @@
       "surface": "grass",
       "tour_level": "grand_slam",
       "best_of": 5,
-      "exp_games": 45.0
+      "exp_games": 44.9
     }
   }
 }
