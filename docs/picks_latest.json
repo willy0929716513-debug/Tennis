@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-07-12 19:06 (台灣時間)",
-  "generated_at_iso": "2026-07-12T19:06:58+08:00",
-  "date": "2026-07-12",
+  "generated_at": "2026-07-13 04:06 (台灣時間)",
+  "generated_at_iso": "2026-07-13T04:06:26+08:00",
+  "date": "2026-07-13",
   "model_version": "v4.0 — PowerDevig+DynH2H+ExpForm+RecencyELO+ProbCalib+15factor",
   "stats": {
     "settled": 51,
@@ -1067,17 +1067,5 @@
     }
   ],
   "live_matches": [],
-  "game_preds": {
-    "jannik sinner|alexander zverev": {
-      "p1": "Jannik Sinner",
-      "p2": "Alexander Zverev",
-      "p1_key": "sinner",
-      "p2_key": "zverev",
-      "model_p1": 0.6044,
-      "surface": "grass",
-      "tour_level": "grand_slam",
-      "best_of": 5,
-      "exp_games": 45.0
-    }
-  }
+  "game_preds": {}
 }
